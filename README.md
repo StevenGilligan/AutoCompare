@@ -49,7 +49,7 @@ AutoCompare.Comparer.Configure<MyObjectType>()
 Configure a IEnumerable (array, list, hashmap, etc.) property to perform a deep compare. To deeply compare lists, you must specify the property to be used as a key or ID. 
 ```c#
 AutoCompare.Comparer.Configure<MyObjectType>()
-    .Enumerable(x => x.ListProperty, x => x.WithKey(y => y.ID));
+    .Enumerable(x => x.ListProperty, x => x.DeepCompare(y => y.ID));
 ```
 
 Calling `Configure<Type>()` is optional and AutoCompare will default to comparing every property, without doing deep compare for enumerables and dictionaries. 
