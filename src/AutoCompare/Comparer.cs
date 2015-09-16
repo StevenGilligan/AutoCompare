@@ -174,13 +174,13 @@ namespace AutoCompare
                 {
                     continue;
                 }
-                ctx.PropA = Expression.Property(ctx.A, propMethodInfo);
-                ctx.PropB = Expression.Property(ctx.B, propMethodInfo);
+                ctx.PropA = Expression.Property(ctx.A, prop);
+                ctx.PropB = Expression.Property(ctx.B, prop);
                 ctx.Name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}.{prop.Name}";
                 if (propType.IsPrimitive || propType.IsEnum || IsSystemValueType(propType))
                 {
                     // ValueType, simply compare value with an if (a.X != b.X) 
-                    expressions.Add(GetPropertyCompareExpression(ctx, propMethodInfo));
+                    expressions.Add(GetPropertyCompareExpression(ctx, prop));
                 }
                 else if (propType.GetInterfaces().Any(x =>
                     x.IsGenericType &&
@@ -361,7 +361,7 @@ namespace AutoCompare
         /// <param name="ctx"></param>
         /// <param name="propMethodInfo"></param>
         /// <returns></returns>
-        private static Expression GetPropertyCompareExpression(CompilerContext ctx, MethodInfo propMethodInfo)
+        private static Expression GetPropertyCompareExpression(CompilerContext ctx, PropertyInfo property)
         {
             /* The following expression tree compiles to essentially this : 
              * 
@@ -384,8 +384,8 @@ namespace AutoCompare
                                     Expression.Equal(ctx.B, nullConst)),
                                 Expression.NotEqual(ctx.A, ctx.B)),
                             Expression.NotEqual(
-                                Expression.Property(ctx.A, propMethodInfo),
-                                Expression.Property(ctx.B, propMethodInfo))),
+                                Expression.Property(ctx.A, property),
+                                Expression.Property(ctx.B, property))),
                         Expression.Call(ctx.List, _listAdd,
                             Expression.MemberInit(
                                 Expression.New(_updateType),

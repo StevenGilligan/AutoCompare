@@ -6,7 +6,7 @@ using System.Linq;
 namespace AutoCompare.Tests
 {
     [TestClass]
-    public class ComparerTests
+    public partial class ComparerTests
     {
         [TestMethod]
         public void When_I_Compare_Two_Objects_I_Get_A_List_Of_Updated_Properties()
