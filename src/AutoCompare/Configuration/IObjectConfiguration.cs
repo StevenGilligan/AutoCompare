@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 namespace AutoCompare.Configuration
 {
     /// <summary>
-    /// Lets you configure how a model should be compared by the Comparer
+    /// Lets you configure how a type should be compared by the AutoCompare engine
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IObjectConfiguration<T>
@@ -33,5 +33,7 @@ namespace AutoCompare.Configuration
         /// <param name="propertyExpression">Lambda expression of the dictionary property to deeply compare</param>
         /// <returns>self</returns>
         IObjectConfiguration<T> DeepCompare<TKey, TValue>(Expression<Func<T, IDictionary<TKey, TValue>>> propertyExpression);
+
+        IPrecompile Compile { get; }
     }
 }

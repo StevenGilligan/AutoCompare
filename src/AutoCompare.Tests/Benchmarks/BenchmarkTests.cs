@@ -37,7 +37,7 @@ namespace AutoCompare.Tests.Benchmarks
 
             var sw = new Stopwatch();
             sw.Start();
-            var comparer = Comparer.GetComparer<SimpleModel>();
+            var comparer = Comparer.Get<SimpleModel>();
             sw.Stop();
             var compilation = sw.ElapsedMilliseconds;
             sw.Reset();
@@ -94,7 +94,7 @@ namespace AutoCompare.Tests.Benchmarks
             var sw = new Stopwatch();
 
             sw.Start();
-            var comparer = Comparer.GetComparer<NestedModel>();
+            var comparer = Comparer.Get<NestedModel>();
             sw.Stop();
             var compilation = sw.ElapsedMilliseconds;
             sw.Reset();

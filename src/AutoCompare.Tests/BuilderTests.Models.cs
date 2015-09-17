@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoCompare.Tests
 {
-    public partial class InheritanceTests
+    public partial class BuilderTests
     {
         private class Parent
         {

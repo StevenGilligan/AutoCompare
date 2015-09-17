@@ -37,7 +37,7 @@ namespace AutoCompare
         /// <param name="newModel"></param>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public static IEnumerable<Update> CompareIEnumerableWithKey<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector) where T : class
+        public static IEnumerable<Difference> CompareIEnumerableWithKey<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector) where T : class
         {
             return DeepCompareIDictionary(name, oldModel.EmptyIfNull().ToDictionary(selector), newModel.EmptyIfNull().ToDictionary(selector));
         }
@@ -53,10 +53,10 @@ namespace AutoCompare
         /// <param name="selector"></param>
         /// <param name="defaultKey"></param>
         /// <returns></returns>
-        public static IEnumerable<Update> CompareIEnumerableWithKeyAndDefault<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector, TKey defaultKey) where T : class
+        public static IEnumerable<Difference> CompareIEnumerableWithKeyAndDefault<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector, TKey defaultKey) where T : class
         {
-            var changes = new List<Update>();
-            var comparer = Comparer.GetComparer<T>();
+            var changes = new List<Difference>();
+            var comparer = Comparer.Get<T>();
 
             var oldList = oldModel.EmptyIfNull().ToList();
             var newList = newModel.EmptyIfNull().ToList();
@@ -68,7 +68,7 @@ namespace AutoCompare
 
             changes.AddRange(DeepCompareIDictionary(name, oldDict, newDict));
             var counter = 1;
-            Func<Update, int, Update> updateName = (x, y) =>
+            Func<Difference, int, Difference> updateName = (x, y) =>
             {
                 var id = $"{{New {y}}}";
                 x.Name = $"{name}.{id}.{x.Name}";
@@ -90,19 +90,19 @@ namespace AutoCompare
         /// <param name="oldModel">The list of values from the old model</param>
         /// <param name="newModel">The list of updated values from the new model</param>
         /// <returns>A list of values that have been added or removed from the list</returns>
-        public static IEnumerable<Update> CompareIEnumerable<T>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel)
+        public static IEnumerable<Difference> CompareIEnumerable<T>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel)
         {
             var oldHash = new HashSet<T>(oldModel.EmptyIfNull());
             var newHash = new HashSet<T>(newModel.EmptyIfNull());
 
-            var changed = newHash.Except(oldHash).Select(added => new Update
+            var changed = newHash.Except(oldHash).Select(added => new Difference
             {
                 Name = name,
                 OldValue = null,
                 NewValue = added,
             }).ToList();
 
-            changed.AddRange(oldHash.Except(newHash).Select(removed => new Update
+            changed.AddRange(oldHash.Except(newHash).Select(removed => new Difference
             {
                 Name = name,
                 OldValue = removed,
@@ -122,28 +122,28 @@ namespace AutoCompare
         /// <param name="oldModel">The dictionary of values from the old model</param>
         /// <param name="newModel">The dictionary of updated values from the new model</param>
         /// <returns>A list of values that have been updated, added or removed from the dictionary</returns>
-        public static IEnumerable<Update> CompareIDictionary<TKey, TValue>(string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel)
+        public static IEnumerable<Difference> CompareIDictionary<TKey, TValue>(string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel)
         {
             var oldHash = new HashSet<TKey>(oldModel.EmptyIfNull().Keys);
             var newHash = new HashSet<TKey>(newModel.EmptyIfNull().Keys);
 
             var changed = (from key in oldHash.Intersect(newHash)
                            where !Equals(oldModel[key], newModel[key])
-                           select new Update
+                           select new Difference
                            {
                                Name = $"{name}.{key}",
                                OldValue = oldModel[key],
                                NewValue = newModel[key],
                            }).ToList();
 
-            changed.AddRange(newHash.Except(oldHash).Select(added => new Update
+            changed.AddRange(newHash.Except(oldHash).Select(added => new Difference
             {
                 Name = $"{name}.{added}",
                 OldValue = null,
                 NewValue = newModel[added],
             }));
 
-            changed.AddRange(oldHash.Except(newHash).Select(removed => new Update
+            changed.AddRange(oldHash.Except(newHash).Select(removed => new Difference
             {
                 Name = $"{name}.{removed}",
                 OldValue = oldModel[removed],
@@ -162,9 +162,9 @@ namespace AutoCompare
         /// <param name="oldModel">The dictionary of values from the old model</param>
         /// <param name="newModel">The dictionary of updated values from the new model</param>
         /// <returns>A list of values that have been updated, added or removed from the dictionary</returns>
-        public static IEnumerable<Update> DeepCompareIDictionary<TKey, TValue>(string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel) where TValue : class
+        public static IEnumerable<Difference> DeepCompareIDictionary<TKey, TValue>(string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel) where TValue : class
         {
-            var comparer = Comparer.GetComparer<TValue>();
+            var comparer = Comparer.Get<TValue>();
 
             var oldHash = new HashSet<TKey>(oldModel.EmptyIfNull().Keys);
             var newHash = new HashSet<TKey>(newModel.EmptyIfNull().Keys);

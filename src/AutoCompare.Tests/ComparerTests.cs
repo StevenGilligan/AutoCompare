@@ -9,9 +9,9 @@ namespace AutoCompare.Tests
     public partial class ComparerTests
     {
         [TestMethod]
-        public void When_I_Compare_Two_Objects_I_Get_A_List_Of_Updated_Properties()
+        public void Compare_Simple_Model()
         {
-            var comparer = Comparer.GetComparer<SimpleModel>();
+            var comparer = Comparer.Get<SimpleModel>();
             var oldModel = new SimpleModel
             {
                 Id = 1,
@@ -48,9 +48,9 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Nested_Objects_I_Get_Nested_Properties()
+        public void Compare_Nestted_Objects()
         {
-            var comparer = Comparer.GetComparer<NestedModel>();
+            var comparer = Comparer.Get<NestedModel>();
             var oldModel = new NestedModel
             {
                 Id = 1,
@@ -91,9 +91,9 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_IEnumerable_I_Get_Added_And_Removed_Values()
+        public void Compare_Object_With_List_Property()
         {
-            var comparer = Comparer.GetComparer<HasList>();
+            var comparer = Comparer.Get<HasList>();
             var oldModel = new HasList
             {
                 Ids = new List<int> { 1, 2, 3, 4, 5 }
@@ -109,9 +109,9 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_IDictionary_I_Get_Updated_Added_And_Removed_Values()
+        public void Compare_Object_With_Dictionary_Property()
         {
-            var comparer = Comparer.GetComparer<HasDictionary>();
+            var comparer = Comparer.Get<HasDictionary>();
             var oldModel = new HasDictionary
             {
                 Names = new Dictionary<string, string>
@@ -137,7 +137,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Ignore_A_Property_It_Should_Not_Test_It()
+        public void Compare_Object_With_Ignored_Properties()
         {
             Comparer.Configure<HasIgnores>()
                 .Ignore(x => x.IgnoreChild)
@@ -172,7 +172,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Null_Objects_I_Get_All_Properties()
+        public void Compare_Object_Against_Null()
         {
             var model = new SimpleModel
             {
@@ -191,7 +191,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Nested_Null_Objects_It_Works()
+        public void Compare_Nested_Null_Object_Does_Not_Throw_NullReferenceException()
         {
             var oldModel = new NestedModel()
             {
@@ -223,7 +223,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Dictionary_Of_Objects_It_Does_A_Deep_Comparison()
+        public void Compare_Dictionary_With_Deep_Compare()
         {
             Comparer.Configure<ObjectDictionary>()
                 .DeepCompare(x => x.Nested);
@@ -272,7 +272,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Lists_Of_Objects_I_Can_Specify_An_Id()
+        public void Compare_List_As_Deep_Compare()
         {
             Comparer.Configure<NestedList>()
                 .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id));
@@ -327,7 +327,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_I_Compare_Lists_Of_Objects_I_Can_Specify_A_Default_Key()
+        public void Compare_List_As_Deep_Compare_With_Key()
         {
             Comparer.Configure<NestedListWithDefault>()
                 .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id, 0));
@@ -382,7 +382,7 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void When_Models_Are_Null_Do_Not_Explode()
+        public void Compare_Null_With_Null()
         {
             var changes = Comparer.Compare<NestedModel>(null, null);
             Assert.IsFalse(changes.Any());
