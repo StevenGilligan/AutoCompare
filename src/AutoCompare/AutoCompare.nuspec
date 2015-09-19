@@ -9,8 +9,8 @@
         <licenseUrl>https://github.com/StevenGilligan/AutoCompare/blob/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/StevenGilligan/AutoCompare</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>AutoCompare is a simple library with the goal of making it effortless to compare two objects of the same type to generate the list of modified properties</description>
-        <copyright>AutoCompare is Copyright © 2015 Steven Gilligan and other contributors under the MIT license.</copyright>
+        <description>AutoCompare is a simple library with the goal of making it effortless to compare two objects of the same type to generate the list of modified properties.</description>
+        <copyright>Copyright 2015 Steven Gilligan and other contributors under the MIT license.</copyright>
         <language>en-CA</language>
         <tags>autocompare comparer comparison object diff</tags>
         <frameworkAssemblies>
