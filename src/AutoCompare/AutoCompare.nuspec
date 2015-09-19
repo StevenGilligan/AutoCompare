@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>AutoCompare</id>
+        <version>{version}</version>
+        <title>AutoCompare - A fast object comparison library</title>
+        <authors>Steven Gilligan</authors>
+        <owners>Steven Gilligan</owners>
+        <licenseUrl>https://github.com/StevenGilligan/AutoCompare/blob/master/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/StevenGilligan/AutoCompare</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>AutoCompare is a simple library with the goal of making it effortless to compare two objects of the same type to generate the list of modified properties</description>
+        <copyright>AutoCompare is Copyright © 2015 Steven Gilligan and other contributors under the MIT license.</copyright>
+        <language>en-CA</language>
+        <tags>autocompare comparer comparison object diff</tags>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Core" targetFramework="" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="bin\Release\AutoCompare.dll" target="lib\AutoCompare.dll" />
+        <file src="bin\Release\AutoCompare.pdb" target="lib\AutoCompare.pdb" />
+    </files>
+</package>
