@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/ay77ykijskpiuiy8?svg=true)](https://ci.appveyor.com/project/StevenGilligan/autocompare)
+
 AutoCompare
 ===========
 
