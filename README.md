@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/ay77ykijskpiuiy8?svg=true)](https://ci.appveyor.com/project/StevenGilligan/autocompare)
+[![Build status](https://ci.appveyor.com/api/projects/status/ay77ykijskpiuiy8?svg=true)](https://ci.appveyor.com/project/StevenGilligan/autocompare) [![codecov.io](http://codecov.io/github/StevenGilligan/AutoCompare/coverage.svg?branch=dev)](http://codecov.io/github/StevenGilligan/AutoCompare?branch=dev)
 
 AutoCompare
 ===========
