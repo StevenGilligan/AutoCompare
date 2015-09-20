@@ -20,10 +20,11 @@ namespace AutoCompare.Configuration
         /// <summary>
         /// Lets you configure how an IEnumerable property should be handled by the Comparer
         /// </summary>
-        /// <typeparam name="TList"></typeparam>
+        /// <typeparam name="TEnumerable"></typeparam>
         /// <param name="listExpression">Lambda expression of the Enumerable property to configure</param>
+        /// <param name="configuration">The configuration for this property</param>
         /// <returns></returns>
-        IObjectConfiguration<T> Enumerable<TEnumerable>(Expression<Func<T, IEnumerable<TEnumerable>>> listExpression, Action<IEnumerableConfiguration<T, TEnumerable>> configureList);
+        IObjectConfiguration<T> Enumerable<TEnumerable>(Expression<Func<T, IEnumerable<TEnumerable>>> listExpression, Action<IEnumerableConfiguration<T, TEnumerable>> configuration);
 
         /// <summary>
         /// Specify that a dictionary should use deep compare, that is each object should be compared with the Comparer
@@ -34,6 +35,9 @@ namespace AutoCompare.Configuration
         /// <returns>self</returns>
         IObjectConfiguration<T> DeepCompare<TKey, TValue>(Expression<Func<T, IDictionary<TKey, TValue>>> propertyExpression);
 
+        /// <summary>
+        /// Instructs the IComparerEngine how to precompile this comparer
+        /// </summary>
         IPrecompile Compile { get; }
     }
 }

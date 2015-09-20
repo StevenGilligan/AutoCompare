@@ -6,6 +6,9 @@ using AutoCompare.Extensions;
 
 namespace AutoCompare
 {
+    /// <summary>
+    /// Compares collections using the Comparer
+    /// </summary>
     public static class CollectionComparer
     {
         private static readonly Dictionary<Type, MethodInfo> _compareIEnumerableCache = new Dictionary<Type, MethodInfo>();

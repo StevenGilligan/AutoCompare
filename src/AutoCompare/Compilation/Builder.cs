@@ -87,6 +87,7 @@ namespace AutoCompare.Compilation
         /// </summary>
         /// <param name="type">Type to compare</param>
         /// <param name="ctx">Compiler Context containing the required expressions</param>
+        /// <param name="configuration">The configuration of the current type</param>
         /// <param name="hierarchy">Parent types to avoid circular references like Parent.Child.Parent</param>
         /// <returns></returns>
         private static Expression GetExpressionsForType(Type type, Context ctx, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)
@@ -164,7 +165,7 @@ namespace AutoCompare.Compilation
         /// and return a Difference if needed
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="propMethodInfo"></param>
+        /// <param name="property"></param>
         /// <returns></returns>
         private static Expression GetPropertyCompareExpression(Context ctx, PropertyInfo property)
         {
@@ -226,6 +227,7 @@ namespace AutoCompare.Compilation
         /// <param name="type"></param>
         /// <param name="ctx"></param>
         /// <param name="propMethodInfo"></param>
+        /// <param name="configuration"></param>
         /// <param name="hierarchy"></param>
         /// <returns></returns>
         private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)

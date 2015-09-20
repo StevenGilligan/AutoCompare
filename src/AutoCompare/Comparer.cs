@@ -3,8 +3,14 @@ using System.Collections.Generic;
 
 namespace AutoCompare
 {
+    /// <summary>
+    /// Wraps a default IComparerEngine
+    /// </summary>
     public static class Comparer
     {
+        /// <summary>
+        /// The default IComparerEngine created by AutoCompare
+        /// </summary>
         public static IComparerEngine Engine { get; } = new Engine();
         
         /// <summary>

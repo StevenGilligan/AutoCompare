@@ -14,7 +14,11 @@ The main goal of AutoCompare is making it easy to get differences between two ob
 How to use this library
 -----------------------
 
-This library is not yet available on NuGet. For now, clone this repository, compile it in release and use the library by adding the dll as a reference.
+Include [AutoCompare](https://www.nuget.org/packages/AutoCompare/) in your project using [NuGet](https://www.nuget.org/)
+
+From the package manager console : 
+
+    PM> Install-Package AutoCompare
 
 Features
 --------

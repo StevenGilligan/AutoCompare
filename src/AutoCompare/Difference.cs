@@ -1,5 +1,8 @@
 ﻿namespace AutoCompare
 {
+    /// <summary>
+    /// The results of a comparing a property on two objects of the same type
+    /// </summary>
     public class Difference
     {
         /// <summary>

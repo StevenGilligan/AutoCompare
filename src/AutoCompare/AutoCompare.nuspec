@@ -20,6 +20,6 @@
     </metadata>
     <files>
         <file src="bin\Release\AutoCompare.dll" target="lib\AutoCompare.dll" />
-        <file src="bin\Release\AutoCompare.pdb" target="lib\AutoCompare.pdb" />
+        <file src="bin\Release\AutoCompare.xml" target="lib\AutoCompare.xml" />
     </files>
 </package>

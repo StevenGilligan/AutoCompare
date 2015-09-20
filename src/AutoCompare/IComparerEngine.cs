@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 namespace AutoCompare
 {
+    /// <summary>
+    /// AutoCompare engine. Handles type configuration, compilation and cache
+    /// </summary>
     public interface IComparerEngine
     {
         /// <summary>
-        /// Configures how the AutoCompare engine should handle comparison of the specified type
+        /// Configures how this engine should handle comparison of the specified type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

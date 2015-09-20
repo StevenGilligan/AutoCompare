@@ -7,7 +7,7 @@ namespace AutoCompare.Configuration
     /// Lets you configure how a Enumerable is compared with the Comparer
     /// </summary>
     /// <typeparam name="TParent"></typeparam>
-    /// <typeparam name="TList"></typeparam>
+    /// <typeparam name="TEnumerable"></typeparam>
     public interface IEnumerableConfiguration<TParent, TEnumerable>
     {
         /// <summary>

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AutoCompare.Configuration
 {
+    /// <summary>
+    /// Instructs the IComparerEngine how to precompile this comparer
+    /// </summary>
     public interface IPrecompile
     {
         /// <summary>
