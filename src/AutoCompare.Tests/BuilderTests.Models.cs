@@ -31,5 +31,30 @@ namespace AutoCompare.Tests
 			public string ChildName { get; set; }
 			public ParentCirularRef Parent { get; set; }
         }
+        
+        private class NoPublicProperty
+        {
+            private int Id { get; set; }
+            private bool _bool;
+            public bool DoSomething() => !_bool;
+
+            public NoPublicProperty(int id)
+            {
+                Id = id;
+                _bool = Id % 2 == 0;
+            }
+        }
+
+        private class IgnoreAllProperties
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        private class CompileTwice
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
     }
 }
