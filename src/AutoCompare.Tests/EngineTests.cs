@@ -6,12 +6,12 @@ using System.Linq;
 namespace AutoCompare.Tests
 {
     [TestClass]
-    public partial class ComparerTests
+    public partial class EngineTests : AutoCompareBaseTest
     {
         [TestMethod]
         public void Compare_Simple_Model()
         {
-            var comparer = Comparer.Get<SimpleModel>();
+            var comparer = SutEngine.Get<SimpleModel>();
             var oldModel = new SimpleModel
             {
                 Id = 1,
@@ -50,7 +50,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Nestted_Objects()
         {
-            var comparer = Comparer.Get<NestedModel>();
+            var comparer = SutEngine.Get<NestedModel>();
             var oldModel = new NestedModel
             {
                 Id = 1,
@@ -93,7 +93,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Object_With_List_Property()
         {
-            var comparer = Comparer.Get<HasList>();
+            var comparer = SutEngine.Get<HasList>();
             var oldModel = new HasList
             {
                 Ids = new List<int> { 1, 2, 3, 4, 5 }
@@ -111,7 +111,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Object_With_Dictionary_Property()
         {
-            var comparer = Comparer.Get<HasDictionary>();
+            var comparer = SutEngine.Get<HasDictionary>();
             var oldModel = new HasDictionary
             {
                 Names = new Dictionary<string, string>
@@ -139,7 +139,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Object_With_Ignored_Properties()
         {
-            Comparer.Configure<HasIgnores>()
+            SutEngine.Configure<HasIgnores>()
                 .Ignore(x => x.IgnoreChild)
                 .Ignore(x => x.IgnoreValue);
 
@@ -166,7 +166,7 @@ namespace AutoCompare.Tests
                 }
             };
 
-            var changes = Comparer.Compare(oldModel, newModel);
+            var changes = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(changes.Count(), 1);
             Assert.IsNotNull(changes.Single(x => x.Name == "Id" && (long)x.OldValue == 1 && (long)x.NewValue == 2));
         }
@@ -184,8 +184,8 @@ namespace AutoCompare.Tests
                 Time = new TimeSpan(5, 4, 3)
             };
 
-            var nullToModel = Comparer.Compare(null, model);
-            var modelToNull = Comparer.Compare(model, null);
+            var nullToModel = SutEngine.Compare(null, model);
+            var modelToNull = SutEngine.Compare(model, null);
             Assert.IsTrue(nullToModel.All(x =>
                 modelToNull.Single(y => x.Name == y.Name && object.Equals(y.OldValue, x.NewValue)) != null));
         }
@@ -215,7 +215,7 @@ namespace AutoCompare.Tests
                 }
             };
 
-            var changes = Comparer.Compare(oldModel, newModel);
+            var changes = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(changes.Count(), 5);
             Assert.IsNotNull(changes.Single(x => x.Name == "Child.Id"));
             Assert.IsNotNull(changes.Single(x => x.Name == "Child.GrandChild.Value"));
@@ -225,7 +225,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Dictionary_With_Deep_Compare()
         {
-            Comparer.Configure<ObjectDictionary>()
+            SutEngine.Configure<ObjectDictionary>()
                 .DeepCompare(x => x.Nested);
 
             var oldModel = new ObjectDictionary()
@@ -266,7 +266,7 @@ namespace AutoCompare.Tests
                 }
             };
 
-            var changes = Comparer.Compare(oldModel, newModel);
+            var changes = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(changes.Count(), 8);
             Assert.IsNotNull(changes.Single(x => x.Name == "Nested.1.Value"));
         }
@@ -274,7 +274,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_List_As_Deep_Compare()
         {
-            Comparer.Configure<NestedList>()
+            SutEngine.Configure<NestedList>()
                 .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id));
 
             var oldModel = new NestedList()
@@ -321,7 +321,7 @@ namespace AutoCompare.Tests
                 }
             };
 
-            var changes = Comparer.Compare(oldModel, newModel);
+            var changes = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(changes.Count(), 11);
             Assert.IsNotNull(changes.Single(x => x.Name == "Children.100.Name"));
         }
@@ -329,7 +329,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_List_As_Deep_Compare_With_Key()
         {
-            Comparer.Configure<NestedListWithDefault>()
+            SutEngine.Configure<NestedListWithDefault>()
                 .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id, 0));
 
             var oldModel = new NestedListWithDefault()
@@ -376,7 +376,7 @@ namespace AutoCompare.Tests
                 }
             };
 
-            var changes = Comparer.Compare(oldModel, newModel);
+            var changes = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(changes.Count(), 9);
             Assert.IsNotNull(changes.Count(x => x.Name == "Children.0.Id" && (long)x.NewValue == 0) == 3);
         }
@@ -384,7 +384,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Null_With_Null()
         {
-            var changes = Comparer.Compare<NestedModel>(null, null);
+            var changes = SutEngine.Compare<NestedModel>(null, null);
             Assert.IsFalse(changes.Any());
         }
     }

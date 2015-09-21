@@ -1,4 +1,5 @@
 ﻿using AutoCompare.Configuration;
+using System;
 using System.Collections.Generic;
 
 namespace AutoCompare
@@ -33,5 +34,19 @@ namespace AutoCompare
         /// <typeparam name="T">Type of object to compare</typeparam>
         /// <returns>CompiledComparer</returns>
         CompiledComparer<T> Get<T>() where T : class;
+
+        /// <summary>
+        /// Returns if the type is already compiled by this engine
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool IsTypeCompiled(Type type);
+
+        /// <summary>
+        /// Returns if the type is already configured by this engine
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool IsTypeConfigured(Type type);
     }
 }

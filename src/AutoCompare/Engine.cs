@@ -66,6 +66,26 @@ namespace AutoCompare
             return (CompiledComparer<T>)_comparerCache[type];
         }
 
+        /// <summary>
+        /// Returns if the type is already compiled by this engine
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public bool IsTypeCompiled(Type type)
+        {
+            return _comparerCache.ContainsKey(type);
+        }
+
+        /// <summary>
+        /// Returns if the type is already configured by this engine
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public bool IsTypeConfigured(Type type)
+        {
+            return _configurations.ContainsKey(type);
+        }
+
         private void EnsureTypeIsCompiled<T>() where T : class
         {
             var type = typeof(T);
