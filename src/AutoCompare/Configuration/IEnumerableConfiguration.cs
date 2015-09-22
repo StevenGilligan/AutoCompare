@@ -16,7 +16,7 @@ namespace AutoCompare.Configuration
         /// <typeparam name="TKey"></typeparam>
         /// <param name="idExpression">The Id property</param>
         /// <returns>parent</returns>
-        IObjectConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression);
+        IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression);
 
         /// <summary>
         /// Specifies that the Enumerable should be deeply compared
@@ -25,6 +25,6 @@ namespace AutoCompare.Configuration
         /// <param name="idExpression">The lambda expression to select what property should be used as an ID</param>
         /// <param name="idDefaultValue">Specifies a value for the ID that means the object is new and should be treated as such</param>
         /// <returns>parent</returns>
-        IObjectConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression, TKey idDefaultValue);
+        IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression, TKey idDefaultValue);
     }
 }

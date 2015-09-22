@@ -15,21 +15,21 @@ namespace AutoCompare
         private readonly object _buildLock = new object();
         private readonly Dictionary<Type, object> _compilationLocks = new Dictionary<Type, object>();
 
-        private readonly Dictionary<Type, ObjectConfigurationBase> _configurations = new Dictionary<Type, ObjectConfigurationBase>();
+        private readonly Dictionary<Type, ComparerConfiguration> _configurations = new Dictionary<Type, ComparerConfiguration>();
 
         /// <summary>
         /// Configures how this engine should handle comparison of the specified type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public IObjectConfiguration<T> Configure<T>() where T : class
+        public IComparerConfiguration<T> Configure<T>() where T : class
         {
             var type = typeof(T);
             if (_configurations.ContainsKey(type))
             {
                 throw new Exception($"The type {type.Name} is already configured.");
             }
-            var typeConfiguration = new ObjectConfiguration<T>(this);
+            var typeConfiguration = new ComparerConfiguration<T>(this);
             _configurations[type] = typeConfiguration;
             return typeConfiguration;
         }
@@ -113,13 +113,13 @@ namespace AutoCompare
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        ObjectConfigurationBase IBuilderEngine.GetObjectConfiguration(Type type)
+        ComparerConfiguration IBuilderEngine.GetObjectConfiguration(Type type)
         {
             if (_configurations.ContainsKey(type))
             {
                 return _configurations[type];
             }
-            var configuration = new DefaultConfiguration();
+            var configuration = new ComparerConfiguration();
             _configurations[type] = configuration;
             return configuration;
         }

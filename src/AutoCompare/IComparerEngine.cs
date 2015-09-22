@@ -14,7 +14,7 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IObjectConfiguration<T> Configure<T>() where T : class;
+        IComparerConfiguration<T> Configure<T>() where T : class;
 
         /// <summary>
         /// Compares two objects of type T and returns a list

@@ -36,7 +36,7 @@ namespace AutoCompare.Compilation
             _listAddRange = _updateListType.GetMethod("AddRange");
         }
 
-        public static CompiledComparer<T> Build<T>(ObjectConfigurationBase configuration) where T : class
+        public static CompiledComparer<T> Build<T>(ComparerConfiguration configuration) where T : class
         {
             var type = typeof(T);
             
@@ -90,7 +90,7 @@ namespace AutoCompare.Compilation
         /// <param name="configuration">The configuration of the current type</param>
         /// <param name="hierarchy">Parent types to avoid circular references like Parent.Child.Parent</param>
         /// <returns></returns>
-        private static Expression GetExpressionsForType(Type type, Context ctx, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)
+        private static Expression GetExpressionsForType(Type type, Context ctx, ComparerConfiguration configuration, HashSet<Type> hierarchy)
         {
             if (hierarchy.Contains(type))
             {
@@ -110,7 +110,8 @@ namespace AutoCompare.Compilation
             {
                 var propMethodInfo = prop.GetGetMethod();
                 var propType = prop.PropertyType;
-                if (configuration.IsIgnored(propMethodInfo))
+                var propertyConfiguration = configuration.GetPropertyConfiguration(propMethodInfo.Name);
+                if (propertyConfiguration.Ignored)
                 {
                     continue;
                 }
@@ -230,7 +231,7 @@ namespace AutoCompare.Compilation
         /// <param name="configuration"></param>
         /// <param name="hierarchy"></param>
         /// <returns></returns>
-        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)
+        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ComparerConfiguration configuration, HashSet<Type> hierarchy)
         {
             var tempA = Expression.Parameter(propMethodInfo.ReturnType, "tempA");
             var tempB = Expression.Parameter(propMethodInfo.ReturnType, "tempB");

@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace AutoCompare.Tests.Benchmarks
 {
     [TestClass]
-    public partial class BenchmarkTests
+    public partial class BenchmarkTests : AutoCompareBaseTest
     {
         [TestCategory("Benchmarks")]
         [TestMethod]
@@ -37,7 +37,7 @@ namespace AutoCompare.Tests.Benchmarks
 
             var sw = new Stopwatch();
             sw.Start();
-            var comparer = Comparer.Get<SimpleModel>();
+            var comparer = SutEngine.Get<SimpleModel>();
             sw.Stop();
             var compilation = sw.ElapsedMilliseconds;
             sw.Reset();
@@ -94,7 +94,7 @@ namespace AutoCompare.Tests.Benchmarks
             var sw = new Stopwatch();
 
             sw.Start();
-            var comparer = Comparer.Get<NestedModel>();
+            var comparer = SutEngine.Get<NestedModel>();
             sw.Stop();
             var compilation = sw.ElapsedMilliseconds;
             sw.Reset();
