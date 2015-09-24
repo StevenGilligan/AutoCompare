@@ -12,9 +12,6 @@ namespace AutoCompare
     /// </summary>
     public static class CollectionComparer
     {
-        private static readonly Dictionary<Type, MethodInfo> _compareIEnumerableCache = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<Tuple<Type, Type>, MethodInfo> _compareIDictionaryCache = new Dictionary<Tuple<Type, Type>, MethodInfo>();
-
         private static readonly MethodInfo _compareIEnumerableMethodInfo;
         private static readonly MethodInfo _compareIEnumerableWithKeyMethodInfo;
         private static readonly MethodInfo _compareIEnumerableWithKeyAndDefaultMethodInfo;
@@ -29,22 +26,6 @@ namespace AutoCompare
             _compareIEnumerableWithKeyAndDefaultMethodInfo = selfType.GetMethod("CompareIEnumerableWithKeyAndDefault", BindingFlags.Public | BindingFlags.Static);
             _compareIDictionaryMethodInfo = selfType.GetMethod("CompareIDictionary", BindingFlags.Public | BindingFlags.Static);
             _deepCompareIDictionaryMethodInfo = selfType.GetMethod("DeepCompareIDictionary", BindingFlags.Public | BindingFlags.Static);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="engine"></param>
-        /// <param name="name"></param>
-        /// <param name="oldModel"></param>
-        /// <param name="newModel"></param>
-        /// <param name="selector"></param>
-        /// <returns></returns>
-        public static IEnumerable<Difference> CompareIEnumerableWithKey<T, TKey>(IComparerEngine engine, string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector) where T : class
-        {
-            return DeepCompareIDictionary(engine, name, oldModel.EmptyIfNull().ToDictionary(selector), newModel.EmptyIfNull().ToDictionary(selector));
         }
 
         /// <summary>
@@ -216,27 +197,7 @@ namespace AutoCompare
             if (types.Length != 1) throw new ArgumentOutOfRangeException("Must have exactly one type");
             var type = types[0];
 
-            MethodInfo method;
-            if (_compareIEnumerableCache.TryGetValue(type, out method))
-            {
-                return method;
-            }
-            method = _compareIEnumerableMethodInfo.MakeGenericMethod(types);
-            _compareIEnumerableCache[type] = method;
-            return method;
-        }
-
-        /// <summary>
-        /// Returns a generic MethodInfo for the CompareIEnumerableWithKey method of the right type
-        /// </summary>
-        /// <param name="types"></param>
-        /// <returns></returns>
-        internal static MethodInfo GetCompareIEnumerableWithKeyMethodInfo(params Type[] types)
-        {
-            if (types.Length != 2) throw new ArgumentOutOfRangeException("Must have exactly two types");
-
-            var method = _compareIEnumerableWithKeyMethodInfo.MakeGenericMethod(types);
-            return method;
+            return _compareIEnumerableMethodInfo.MakeGenericMethod(types);
         }
 
         /// <summary>
@@ -263,22 +224,11 @@ namespace AutoCompare
             var tKey = types[0];
             var tValue = types[1];
 
-            var key = new Tuple<Type, Type>(tKey, tValue);
-            MethodInfo method;
-            if (_compareIDictionaryCache.TryGetValue(key, out method))
-            {
-                return method;
-            }
             if (Builder.IsSimpleType(tValue))
             {
-                method = _compareIDictionaryMethodInfo.MakeGenericMethod(types);
+                return _compareIDictionaryMethodInfo.MakeGenericMethod(types);
             }
-            else
-            {
-                method = _deepCompareIDictionaryMethodInfo.MakeGenericMethod(types);
-            }
-            _compareIDictionaryCache[key] = method;
-            return method;
+            return _deepCompareIDictionaryMethodInfo.MakeGenericMethod(types);
         }
     }
 }

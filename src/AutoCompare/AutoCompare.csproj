@@ -51,7 +51,6 @@
     <Compile Include="Configuration\IEnumerableConfiguration.cs" />
     <Compile Include="Configuration\IComparerConfiguration.cs" />
     <Compile Include="Configuration\EnumerableConfiguration.cs" />
-    <Compile Include="Configuration\EnumerableConfigurationBase.cs" />
     <Compile Include="Configuration\IPrecompile.cs" />
     <Compile Include="Configuration\ComparerConfiguration.cs" />
     <Compile Include="Configuration\IPropertyConfiguration.cs" />

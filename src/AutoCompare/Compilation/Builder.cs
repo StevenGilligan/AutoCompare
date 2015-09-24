@@ -311,31 +311,19 @@ namespace AutoCompare.Compilation
             if (configuration != null && !string.IsNullOrEmpty(configuration.Match))
             {
                 var types = new[] { propType.GetGenericArguments().First(), configuration.MatcherType };
-
-                if (configuration.DefaultId != null)
-                {
-                    // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
-                    return Expression.Call(ctx.List,
-                        _listAddRange,
-                        Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyAndDefaultMethodInfo(types),
-                            Expression.Constant(engine),
-                            Expression.Constant(ctx.Name),
-                            nullChecked.PropA,
-                            nullChecked.PropB,
-                            configuration.Matcher,
-                            Expression.Convert(
-                                Expression.Constant(configuration.DefaultId),
-                                configuration.MatcherType)));
-                }
-                // Static call to CollectionComparer.CompareIEnumerableWithKey<T, TKey> to compare IEnumerable properties
+                
+                // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
                 return Expression.Call(ctx.List,
                     _listAddRange,
-                    Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyMethodInfo(types),
+                    Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyAndDefaultMethodInfo(types),
                         Expression.Constant(engine),
                         Expression.Constant(ctx.Name),
                         nullChecked.PropA,
                         nullChecked.PropB,
-                        configuration.Matcher));
+                        configuration.Matcher,
+                        Expression.Convert(
+                            Expression.Constant(configuration.DefaultId),
+                            configuration.MatcherType)));
             }
             // Static call to CollectionComparer.CompareIEnumerable<T> to compare IEnumerable properties
             return Expression.Call(ctx.List,
