@@ -4,27 +4,26 @@ using System.Linq.Expressions;
 namespace AutoCompare.Configuration
 {
     /// <summary>
-    /// Lets you configure how a Enumerable is compared with the Comparer
+    /// Configures how the engine handles the specified IEnumerable property
     /// </summary>
-    /// <typeparam name="TParent"></typeparam>
-    /// <typeparam name="TEnumerable"></typeparam>
-    public interface IEnumerableConfiguration<TParent, TEnumerable>
+    /// <typeparam name="T"></typeparam>
+    public interface IEnumerableConfiguration<T> : IPropertyConfiguration where T : class
     {
         /// <summary>
-        /// Specifies that the Enumerable should be deeply compared
+        /// Specifies that the IEnumerable property should be compared by matching child objects with the same ID
         /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="idExpression">The Id property</param>
-        /// <returns>parent</returns>
-        IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression);
+        /// <typeparam name="TProp">Type of the property used for matching objects</typeparam>
+        /// <param name="member">The property used for matching objects</param>
+        /// <returns></returns>
+        IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member);
 
         /// <summary>
-        /// Specifies that the Enumerable should be deeply compared
+        /// Specifies that the IEnumerable property should be compared by matching child objects with the same ID
         /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <param name="idExpression">The lambda expression to select what property should be used as an ID</param>
-        /// <param name="idDefaultValue">Specifies a value for the ID that means the object is new and should be treated as such</param>
-        /// <returns>parent</returns>
-        IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> idExpression, TKey idDefaultValue);
+        /// <typeparam name="TProp">Type of the property used for matching objects</typeparam>
+        /// <param name="member">The property used for matching objects</param>
+        /// <param name="defaultId">The default value for the match property, to determine if an object is new</param>
+        /// <returns></returns>
+        IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member, TProp defaultId);
     }
 }

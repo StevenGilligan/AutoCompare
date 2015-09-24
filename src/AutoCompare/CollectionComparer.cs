@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AutoCompare.Extensions;
+using AutoCompare.Compilation;
 
 namespace AutoCompare
 {
@@ -12,7 +13,7 @@ namespace AutoCompare
     public static class CollectionComparer
     {
         private static readonly Dictionary<Type, MethodInfo> _compareIEnumerableCache = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<Tuple<Type, Type, bool>, MethodInfo> _compareIDictionaryCache = new Dictionary<Tuple<Type, Type, bool>, MethodInfo>();
+        private static readonly Dictionary<Tuple<Type, Type>, MethodInfo> _compareIDictionaryCache = new Dictionary<Tuple<Type, Type>, MethodInfo>();
 
         private static readonly MethodInfo _compareIEnumerableMethodInfo;
         private static readonly MethodInfo _compareIEnumerableWithKeyMethodInfo;
@@ -35,14 +36,15 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TKey"></typeparam>
+        /// <param name="engine"></param>
         /// <param name="name"></param>
         /// <param name="oldModel"></param>
         /// <param name="newModel"></param>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public static IEnumerable<Difference> CompareIEnumerableWithKey<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector) where T : class
+        public static IEnumerable<Difference> CompareIEnumerableWithKey<T, TKey>(IComparerEngine engine, string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector) where T : class
         {
-            return DeepCompareIDictionary(name, oldModel.EmptyIfNull().ToDictionary(selector), newModel.EmptyIfNull().ToDictionary(selector));
+            return DeepCompareIDictionary(engine, name, oldModel.EmptyIfNull().ToDictionary(selector), newModel.EmptyIfNull().ToDictionary(selector));
         }
 
         /// <summary>
@@ -50,16 +52,17 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TKey"></typeparam>
+        /// <param name="engine"></param>
         /// <param name="name"></param>
         /// <param name="oldModel"></param>
         /// <param name="newModel"></param>
         /// <param name="selector"></param>
         /// <param name="defaultKey"></param>
         /// <returns></returns>
-        public static IEnumerable<Difference> CompareIEnumerableWithKeyAndDefault<T, TKey>(string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector, TKey defaultKey) where T : class
+        public static IEnumerable<Difference> CompareIEnumerableWithKeyAndDefault<T, TKey>(IComparerEngine engine, string name, IEnumerable<T> oldModel, IEnumerable<T> newModel, Func<T, TKey> selector, TKey defaultKey) where T : class
         {
             var changes = new List<Difference>();
-            var comparer = Comparer.Get<T>();
+            var comparer = engine.Get<T>();
 
             var oldList = oldModel.EmptyIfNull().ToList();
             var newList = newModel.EmptyIfNull().ToList();
@@ -69,7 +72,7 @@ namespace AutoCompare
             var oldDict = oldList.Except(oldModelWithDefaultKey).ToDictionary(selector);
             var newDict = newList.Except(newModelWithDefaultKey).ToDictionary(selector);
 
-            changes.AddRange(DeepCompareIDictionary(name, oldDict, newDict));
+            changes.AddRange(DeepCompareIDictionary(engine, name, oldDict, newDict));
             var counter = 1;
             Func<Difference, int, Difference> updateName = (x, y) =>
             {
@@ -161,13 +164,14 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="TKey">Type of the IDictionary key</typeparam>
         /// <typeparam name="TValue">Type of the IDictionary value</typeparam>
+        /// <param name="engine"></param>
         /// <param name="name">Name of the property</param>
         /// <param name="oldModel">The dictionary of values from the old model</param>
         /// <param name="newModel">The dictionary of updated values from the new model</param>
         /// <returns>A list of values that have been updated, added or removed from the dictionary</returns>
-        public static IEnumerable<Difference> DeepCompareIDictionary<TKey, TValue>(string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel) where TValue : class
+        public static IEnumerable<Difference> DeepCompareIDictionary<TKey, TValue>(IComparerEngine engine, string name, IDictionary<TKey, TValue> oldModel, IDictionary<TKey, TValue> newModel) where TValue : class
         {
-            var comparer = Comparer.Get<TValue>();
+            var comparer = engine.Get<TValue>();
 
             var oldHash = new HashSet<TKey>(oldModel.EmptyIfNull().Keys);
             var newHash = new HashSet<TKey>(newModel.EmptyIfNull().Keys);
@@ -251,28 +255,27 @@ namespace AutoCompare
         /// <summary>
         /// Returns a generic MethodInfo for the CompareIDictionary method of the right types
         /// </summary>
-        /// <param name="deepCompare"></param>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal static MethodInfo GetCompareIDictionaryMethodInfo(bool deepCompare, params Type[] types)
+        internal static MethodInfo GetCompareIDictionaryMethodInfo(params Type[] types)
         {
             if (types.Length != 2) throw new ArgumentOutOfRangeException("Must have exactly 2 types");
             var tKey = types[0];
             var tValue = types[1];
 
-            var key = new Tuple<Type, Type, bool>(tKey, tValue, deepCompare);
+            var key = new Tuple<Type, Type>(tKey, tValue);
             MethodInfo method;
             if (_compareIDictionaryCache.TryGetValue(key, out method))
             {
                 return method;
             }
-            if (deepCompare)
+            if (Builder.IsSimpleType(tValue))
             {
-                method = _deepCompareIDictionaryMethodInfo.MakeGenericMethod(types);
+                method = _compareIDictionaryMethodInfo.MakeGenericMethod(types);
             }
             else
             {
-                method = _compareIDictionaryMethodInfo.MakeGenericMethod(types);
+                method = _deepCompareIDictionaryMethodInfo.MakeGenericMethod(types);
             }
             _compareIDictionaryCache[key] = method;
             return method;

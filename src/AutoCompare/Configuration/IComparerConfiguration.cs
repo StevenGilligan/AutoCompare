@@ -5,13 +5,13 @@ using System.Linq.Expressions;
 namespace AutoCompare.Configuration
 {
     /// <summary>
-    /// Lets you configure how a type should be compared by the AutoCompare engine
+    /// Configures how the engine handles a specified type
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IComparerConfiguration<T>
     {
         /// <summary>
-        /// 
+        /// Configures how the engine handles the specified property
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
@@ -20,29 +20,49 @@ namespace AutoCompare.Configuration
         IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IPropertyConfiguration> configuration);
 
         /// <summary>
-        /// Ignores a property from being compared
+        /// Configures how the engine handles the specified IEnumerable property
         /// </summary>
-        /// <param name="ignoreExpression">Lambda expression of the property to ignore</param>
-        /// <returns>self</returns>
-        IComparerConfiguration<T> Ignore(Expression<Func<T, object>> ignoreExpression);
-
-        /// <summary>
-        /// Lets you configure how an IEnumerable property should be handled by the Comparer
-        /// </summary>
-        /// <typeparam name="TEnumerable"></typeparam>
-        /// <param name="listExpression">Lambda expression of the Enumerable property to configure</param>
-        /// <param name="configuration">The configuration for this property</param>
+        /// <typeparam name="TProp"></typeparam>
+        /// <param name="member"></param>
+        /// <param name="configuration"></param>
         /// <returns></returns>
-        IComparerConfiguration<T> Enumerable<TEnumerable>(Expression<Func<T, IEnumerable<TEnumerable>>> listExpression, Action<IEnumerableConfiguration<T, TEnumerable>> configuration);
+        IComparerConfiguration<T> For<TProp>(Expression<Func<T, IEnumerable<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
 
         /// <summary>
-        /// Specify that a dictionary should use deep compare, that is each object should be compared with the Comparer
+        /// Configures how the engine handles the specified List property
         /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <typeparam name="TValue"></typeparam>
-        /// <param name="propertyExpression">Lambda expression of the dictionary property to deeply compare</param>
+        /// <typeparam name="TProp"></typeparam>
+        /// <param name="member"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        IComparerConfiguration<T> For<TProp>(Expression<Func<T, List<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
+
+        /// <summary>
+        /// Configures how the engine handles the specified IList property
+        /// </summary>
+        /// <typeparam name="TProp"></typeparam>
+        /// <param name="member"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        IComparerConfiguration<T> For<TProp>(Expression<Func<T, IList<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
+
+        /// <summary>
+        /// Configures how the engine handles the specified array property
+        /// </summary>
+        /// <typeparam name="TProp"></typeparam>
+        /// <param name="member"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp[]>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
+
+        /// <summary>
+        /// Ignores a property. A shortcut for 
+        /// .For(x => x.Property, x => x.Ignore())
+        /// </summary>
+        /// <typeparam name="TProp"></typeparam>
+        /// <param name="member">The property to ignore</param>
         /// <returns>self</returns>
-        IComparerConfiguration<T> DeepCompare<TKey, TValue>(Expression<Func<T, IDictionary<TKey, TValue>>> propertyExpression);
+        IComparerConfiguration<T> Ignore<TProp>(Expression<Func<T, TProp>> member);
 
         /// <summary>
         /// Instructs the IComparerEngine how to precompile this comparer

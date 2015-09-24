@@ -58,6 +58,7 @@
     <Compile Include="Benchmarks\BenchmarkTests.cs" />
     <Compile Include="Benchmarks\BenchmarkTests.Models.cs" />
     <Compile Include="BuilderTests.cs" />
+    <Compile Include="ComparerTests.cs" />
     <Compile Include="EngineTests.cs" />
     <Compile Include="ConfigurationTests.cs" />
     <Compile Include="IoCTests.cs" />

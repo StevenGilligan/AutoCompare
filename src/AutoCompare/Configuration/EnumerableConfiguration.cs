@@ -1,28 +1,31 @@
-﻿using System;
+﻿using AutoCompare.Helpers;
+using System;
 using System.Linq.Expressions;
 
 namespace AutoCompare.Configuration
 {
-    internal class EnumerableConfiguration<TParent, TEnumerable> : EnumerableConfigurationBase, IEnumerableConfiguration<TParent, TEnumerable>
+    internal class EnumerableConfiguration : PropertyConfiguration
     {
-        private readonly IComparerConfiguration<TParent> _parent;
+        public Expression Matcher { get; protected set; }
+        public Type MatcherType { get; protected set; }
+        public string Match { get; protected set; }
+        public object DefaultId { get; protected set; }
+    }
 
-        public EnumerableConfiguration(IComparerConfiguration<TParent> parent)
+    internal class EnumerableConfiguration<T> : EnumerableConfiguration, IEnumerableConfiguration<T> where T : class
+    {
+        public IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member)
         {
-            _parent = parent;
+            return MatchUsing(member, default(TProp));
         }
 
-        public IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> keyExpression)
+        public IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member, TProp defaultId)
         {
-            KeySelector = keyExpression;
-            KeyType = typeof(TKey);
-            return _parent;
-        }
-
-        public IComparerConfiguration<TParent> DeepCompare<TKey>(Expression<Func<TEnumerable, TKey>> keyExpression, TKey keyDefaultValue)
-        {
-            KeyDefaultValue = keyDefaultValue;
-            return DeepCompare(keyExpression);
+            DefaultId = defaultId;
+            Match = ReflectionHelper.GetPropertyGetterMemberInfo(member).Name;
+            Matcher = member;
+            MatcherType = typeof(TProp);
+            return this;
         }
     }
 }

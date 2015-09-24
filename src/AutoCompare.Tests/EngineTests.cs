@@ -225,8 +225,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Compare_Dictionary_With_Deep_Compare()
         {
-            SutEngine.Configure<ObjectDictionary>()
-                .DeepCompare(x => x.Nested);
+            SutEngine.Configure<ObjectDictionary>();
 
             var oldModel = new ObjectDictionary()
             {
@@ -275,7 +274,7 @@ namespace AutoCompare.Tests
         public void Compare_List_As_Deep_Compare()
         {
             SutEngine.Configure<NestedList>()
-                .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id));
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id));
 
             var oldModel = new NestedList()
             {
@@ -327,10 +326,10 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
-        public void Compare_List_As_Deep_Compare_With_Key()
+        public void Compare_List_As_Deep_Compare_With_Default()
         {
             SutEngine.Configure<NestedListWithDefault>()
-                .Enumerable(x => x.Children, x => x.DeepCompare(y => y.Id, 0));
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id, -1));
 
             var oldModel = new NestedListWithDefault()
             {
@@ -357,19 +356,19 @@ namespace AutoCompare.Tests
                     },
                     new GrandChildModel()
                     {
-                        Id = 0,
+                        Id = -1,
                         Name = "Name 2",
                         Value = 200
                     },
                     new GrandChildModel()
                     {
-                        Id = 0,
+                        Id = -1,
                         Name = "Name 3",
                         Value = 300
                     },
                     new GrandChildModel()
                     {
-                        Id = 0,
+                        Id = -1,
                         Name = "Name 4",
                         Value = 400
                     },

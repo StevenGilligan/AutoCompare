@@ -3,7 +3,7 @@ using System;
 
 namespace AutoCompare.Compilation
 {
-    internal interface IBuilderEngine
+    internal interface IBuilderEngine : IComparerEngine
     {
         ComparerConfiguration GetObjectConfiguration(Type type);
 

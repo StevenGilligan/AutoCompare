@@ -119,7 +119,7 @@ namespace AutoCompare
             {
                 return _configurations[type];
             }
-            var configuration = new ComparerConfiguration();
+            var configuration = new ComparerConfiguration(this);
             _configurations[type] = configuration;
             return configuration;
         }
