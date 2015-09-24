@@ -49,19 +49,21 @@
     <Compile Include="Compilation\NullCheckedProperties.cs" />
     <Compile Include="CompiledComparer.cs" />
     <Compile Include="Configuration\IEnumerableConfiguration.cs" />
-    <Compile Include="Configuration\DefaultConfiguration.cs" />
-    <Compile Include="Configuration\IObjectConfiguration.cs" />
+    <Compile Include="Configuration\IComparerConfiguration.cs" />
     <Compile Include="Configuration\EnumerableConfiguration.cs" />
-    <Compile Include="Configuration\EnumerableConfigurationBase.cs" />
     <Compile Include="Configuration\IPrecompile.cs" />
-    <Compile Include="Configuration\ObjectConfiguration.cs" />
-    <Compile Include="Configuration\ObjectConfigurationBase.cs" />
+    <Compile Include="Configuration\ComparerConfiguration.cs" />
+    <Compile Include="Configuration\IPropertyConfiguration.cs" />
+    <Compile Include="Configuration\PropertyConfiguration.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Helpers\ReflectionHelper.cs" />
     <Compile Include="IComparerEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Difference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

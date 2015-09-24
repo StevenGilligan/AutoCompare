@@ -3,9 +3,9 @@ using System;
 
 namespace AutoCompare.Compilation
 {
-    internal interface IBuilderEngine
+    internal interface IBuilderEngine : IComparerEngine
     {
-        ObjectConfigurationBase GetObjectConfiguration(Type type);
+        ComparerConfiguration GetObjectConfiguration(Type type);
 
         void Compile<T>() where T : class;
     }

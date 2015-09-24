@@ -18,7 +18,7 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IObjectConfiguration<T> Configure<T>() where T : class
+        public static IComparerConfiguration<T> Configure<T>() where T : class
         {
             return Engine.Configure<T>();
         }

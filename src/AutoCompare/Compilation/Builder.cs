@@ -36,7 +36,7 @@ namespace AutoCompare.Compilation
             _listAddRange = _updateListType.GetMethod("AddRange");
         }
 
-        public static CompiledComparer<T> Build<T>(ObjectConfigurationBase configuration) where T : class
+        public static CompiledComparer<T> Build<T>(ComparerConfiguration configuration) where T : class
         {
             var type = typeof(T);
             
@@ -80,6 +80,17 @@ namespace AutoCompare.Compilation
             return newComparer;
         }
 
+        /// <summary>
+        /// Determines if the property type should be compared with a simple equality check
+        /// </summary>
+        /// <param name="propType">The property type to test</param>
+        /// <returns>If we consider this property a value type</returns>
+        public static bool IsSimpleType(Type propType)
+        {
+            return propType.IsPrimitive || propType.IsEnum ||
+                    propType.FullName.StartsWith("System") &&
+                   (!propType.IsGenericType || propType.Name.StartsWith("Nullable"));
+        }
 
         /// <summary>
         /// Creates the list of expressions required to compile a lambda 
@@ -90,7 +101,7 @@ namespace AutoCompare.Compilation
         /// <param name="configuration">The configuration of the current type</param>
         /// <param name="hierarchy">Parent types to avoid circular references like Parent.Child.Parent</param>
         /// <returns></returns>
-        private static Expression GetExpressionsForType(Type type, Context ctx, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)
+        private static Expression GetExpressionsForType(Type type, Context ctx, ComparerConfiguration configuration, HashSet<Type> hierarchy)
         {
             if (hierarchy.Contains(type))
             {
@@ -110,14 +121,16 @@ namespace AutoCompare.Compilation
             {
                 var propMethodInfo = prop.GetGetMethod();
                 var propType = prop.PropertyType;
-                if (configuration.IsIgnored(propMethodInfo))
+                var propertyConfiguration = configuration.GetPropertyConfiguration(propMethodInfo.Name);
+                var enumerableConfiguration = propertyConfiguration as EnumerableConfiguration;
+                if (propertyConfiguration.Ignored)
                 {
                     continue;
                 }
                 ctx.PropA = Expression.Property(ctx.A, prop);
                 ctx.PropB = Expression.Property(ctx.B, prop);
                 ctx.Name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}.{prop.Name}";
-                if (propType.IsPrimitive || propType.IsEnum || IsSystemValueType(propType))
+                if (IsSimpleType(propType))
                 {
                     // ValueType, simply compare value with an if (a.X != b.X) 
                     expressions.Add(GetPropertyCompareExpression(ctx, prop));
@@ -127,15 +140,13 @@ namespace AutoCompare.Compilation
                     x.GetGenericTypeDefinition() == _genericIDictionaryType))
                 {
                     // Static call to CollectionComparer.CompareIDictionary<K,V> to compare IDictionary properties
-                    var isDeepCompare = configuration.IsDeepCompare(propMethodInfo);
-                    expressions.Add(GetIDictionaryPropertyExpression(ctx, isDeepCompare, propType));
+                    expressions.Add(GetIDictionaryPropertyExpression(ctx, configuration.Engine, propType));
                 }
                 else if (propType.GetInterfaces().Any(x =>
                     x.IsGenericType &&
                     x.GetGenericTypeDefinition() == _genericIEnumerableType))
                 {
-                    var listConfiguration = configuration.GetListConfiguration(propMethodInfo);
-                    expressions.Add(GetIEnumerablePropertyExpression(ctx, listConfiguration, propType));
+                    expressions.Add(GetIEnumerablePropertyExpression(ctx, configuration.Engine, enumerableConfiguration, propType));
                 }
                 else
                 {
@@ -209,18 +220,6 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
-        /// Determines if the property type is a System object type that we should 
-        /// compare as if it was a normal value type
-        /// </summary>
-        /// <param name="propType">The property type to test</param>
-        /// <returns>If we consider this property a value type</returns>
-        private static bool IsSystemValueType(Type propType)
-        {
-            return propType.FullName.StartsWith("System") &&
-                   (!propType.IsGenericType || propType.Name.StartsWith("Nullable"));
-        }
-
-        /// <summary>
         /// Generates the Expression Tree required to test for null and then
         /// recursively test a nested object in the current object
         /// </summary>
@@ -230,7 +229,7 @@ namespace AutoCompare.Compilation
         /// <param name="configuration"></param>
         /// <param name="hierarchy"></param>
         /// <returns></returns>
-        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ObjectConfigurationBase configuration, HashSet<Type> hierarchy)
+        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ComparerConfiguration configuration, HashSet<Type> hierarchy)
         {
             var tempA = Expression.Parameter(propMethodInfo.ReturnType, "tempA");
             var tempB = Expression.Parameter(propMethodInfo.ReturnType, "tempB");
@@ -266,17 +265,32 @@ namespace AutoCompare.Compilation
         /// Returns the expression that compares two IDictionary properties
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="isDeepCompare"></param>
+        /// <param name="engine"></param>
         /// <param name="propType"></param>
         /// <returns></returns>
-        private static MethodCallExpression GetIDictionaryPropertyExpression(Context ctx, bool isDeepCompare, Type propType)
+        private static MethodCallExpression GetIDictionaryPropertyExpression(Context ctx, IComparerEngine engine, Type propType)
         {
             var nullChecked = new NullChecked(ctx, propType);
 
+            var genericPropTypes = propType.GetGenericArguments();
+
+            var methodInfo = CollectionComparer.GetCompareIDictionaryMethodInfo(genericPropTypes);
+
+            if (IsSimpleType(genericPropTypes[1]))
+            {
+                return Expression.Call(ctx.List,
+                    _listAddRange,
+                    Expression.Call(
+                        methodInfo,
+                        Expression.Constant(ctx.Name),
+                        nullChecked.PropA,
+                        nullChecked.PropB));
+            }
             return Expression.Call(ctx.List,
                 _listAddRange,
                 Expression.Call(
-                    CollectionComparer.GetCompareIDictionaryMethodInfo(isDeepCompare, propType.GetGenericArguments()),
+                    methodInfo,
+                    Expression.Constant(engine),
                     Expression.Constant(ctx.Name),
                     nullChecked.PropA,
                     nullChecked.PropB));
@@ -286,39 +300,30 @@ namespace AutoCompare.Compilation
         /// Returns the expression that compares two IEnumerable properties
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="listConfiguration"></param>
+        /// <param name="engine"></param>
+        /// <param name="configuration"></param>
         /// <param name="propType"></param>
         /// <returns></returns>
-        private static Expression GetIEnumerablePropertyExpression(Context ctx, EnumerableConfigurationBase listConfiguration, Type propType)
+        private static Expression GetIEnumerablePropertyExpression(Context ctx, IComparerEngine engine, EnumerableConfiguration configuration, Type propType)
         {
             var nullChecked = new NullChecked(ctx, propType);
 
-            if (listConfiguration != null && listConfiguration.IsDeepCompare)
+            if (configuration != null && !string.IsNullOrEmpty(configuration.Match))
             {
-                var types = new[] { propType.GetGenericArguments().First(), listConfiguration.KeyType };
-
-                if (listConfiguration.KeyDefaultValue != null)
-                {
-                    // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
-                    return Expression.Call(ctx.List,
-                        _listAddRange,
-                        Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyAndDefaultMethodInfo(types),
-                            Expression.Constant(ctx.Name),
-                            nullChecked.PropA,
-                            nullChecked.PropB,
-                            listConfiguration.KeySelector,
-                            Expression.Convert(
-                                Expression.Constant(listConfiguration.KeyDefaultValue),
-                                listConfiguration.KeyType)));
-                }
-                // Static call to CollectionComparer.CompareIEnumerableWithKey<T, TKey> to compare IEnumerable properties
+                var types = new[] { propType.GetGenericArguments().First(), configuration.MatcherType };
+                
+                // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
                 return Expression.Call(ctx.List,
                     _listAddRange,
-                    Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyMethodInfo(types),
+                    Expression.Call(CollectionComparer.GetCompareIEnumerableWithKeyAndDefaultMethodInfo(types),
+                        Expression.Constant(engine),
                         Expression.Constant(ctx.Name),
                         nullChecked.PropA,
                         nullChecked.PropB,
-                        listConfiguration.KeySelector));
+                        configuration.Matcher,
+                        Expression.Convert(
+                            Expression.Constant(configuration.DefaultId),
+                            configuration.MatcherType)));
             }
             // Static call to CollectionComparer.CompareIEnumerable<T> to compare IEnumerable properties
             return Expression.Call(ctx.List,
