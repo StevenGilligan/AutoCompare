@@ -310,7 +310,8 @@ namespace AutoCompare.Compilation
 
             if (configuration != null && !string.IsNullOrEmpty(configuration.Match))
             {
-                var types = new[] { propType.GetGenericArguments().First(), configuration.MatcherType };
+                var itemType = propType.IsArray ? propType.GetElementType() : propType.GetGenericArguments().First();
+                var types = new[] { itemType, configuration.MatcherType };
                 
                 // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
                 return Expression.Call(ctx.List,

@@ -146,4 +146,10 @@ namespace AutoCompare.Tests
             _bool = Id % 2 == 0;
         }
     }
+
+    public class ArrayModel
+    {
+        public int Id { get; set; }
+        public GrandChildModel[] ArrayChildren { get; set; }
+    }
 }
