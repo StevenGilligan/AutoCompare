@@ -93,6 +93,32 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
+        /// Determines if the property type is IEnumerable or implements IEnumerable
+        /// </summary>
+        /// <param name="propType"></param>
+        /// <returns></returns>
+        public static bool IsIEnumerableType(Type propType)
+        {
+            return (propType.IsGenericType && propType.GetGenericTypeDefinition() == _genericIEnumerableType)
+                || propType.GetInterfaces().Any(x =>
+                    x.IsGenericType &&
+                    x.GetGenericTypeDefinition() == _genericIEnumerableType);
+        }
+
+        /// <summary>
+        /// Determines if the property type is IDicionary or implements IDictionary
+        /// </summary>
+        /// <param name="propType"></param>
+        /// <returns></returns>
+        public static bool IsIDictionary(Type propType)
+        {
+            return (propType.IsGenericType && propType.GetGenericTypeDefinition() == _genericIDictionaryType)
+                || propType.GetInterfaces().Any(x =>
+                    x.IsGenericType &&
+                    x.GetGenericTypeDefinition() == _genericIDictionaryType);
+        }
+
+        /// <summary>
         /// Creates the list of expressions required to compile a lambda 
         /// to compare two objects of type T
         /// </summary>
@@ -135,16 +161,12 @@ namespace AutoCompare.Compilation
                     // ValueType, simply compare value with an if (a.X != b.X) 
                     expressions.Add(GetPropertyCompareExpression(ctx, prop));
                 }
-                else if (propType.GetInterfaces().Any(x =>
-                    x.IsGenericType &&
-                    x.GetGenericTypeDefinition() == _genericIDictionaryType))
+                else if (IsIDictionary(propType))
                 {
                     // Static call to CollectionComparer.CompareIDictionary<K,V> to compare IDictionary properties
                     expressions.Add(GetIDictionaryPropertyExpression(ctx, configuration.Engine, propType));
                 }
-                else if (propType.GetInterfaces().Any(x =>
-                    x.IsGenericType &&
-                    x.GetGenericTypeDefinition() == _genericIEnumerableType))
+                else if (IsIEnumerableType(propType))
                 {
                     expressions.Add(GetIEnumerablePropertyExpression(ctx, configuration.Engine, enumerableConfiguration, propType));
                 }

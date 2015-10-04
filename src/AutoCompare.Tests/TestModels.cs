@@ -152,4 +152,22 @@ namespace AutoCompare.Tests
         public int Id { get; set; }
         public GrandChildModel[] ArrayChildren { get; set; }
     }
+
+    public class IListModel
+    {
+        public int Id { get; set; }
+        public IList<GrandChildModel> Children { get; set; }
+    }
+
+    public class IEnumerableModel
+    {
+        public int Id { get; set; }
+        public IEnumerable<GrandChildModel> Children { get; set; }
+    }
+
+    public class IDictionaryModel
+    {
+        public int Id { get; set; }
+        public IDictionary<int, GrandChildModel> Children { get; set; }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 
 namespace AutoCompare.Tests
 {
@@ -34,7 +35,7 @@ namespace AutoCompare.Tests
         {
             SutEngine.Configure<ArrayModel>()
                 .For(x => x.ArrayChildren, x => x.MatchUsing(y => y.Id))
-                .For(x => x.ArrayChildren, x => x.Ignore());
+                .For(x => x.ArrayChildren, x => x.MatchUsing(y => y.Id));
         }
 
         [TestMethod]
@@ -80,6 +81,159 @@ namespace AutoCompare.Tests
                         Name = "Name 3",
                         Value = 300
                     }
+                },
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(6, diff.Count);
+        }
+
+        [TestMethod]
+        public void Configure_IList()
+        {
+            SutEngine.Configure<IListModel>()
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id));
+
+            var oldModel = new IListModel()
+            {
+                Id = 1,
+                Children = new List<GrandChildModel>
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 200,
+                        Name = "Name 2",
+                        Value = 200
+                    }
+                },
+            };
+
+            var newModel = new IListModel()
+            {
+                Id = 1,
+                Children = new List<GrandChildModel>
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 300,
+                        Name = "Name 3",
+                        Value = 300
+                    }
+                },
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(6, diff.Count);
+        }
+
+        [TestMethod]
+        public void Configure_IEnumerable()
+        {
+            SutEngine.Configure<IEnumerableModel>()
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id));
+
+            var oldModel = new IEnumerableModel()
+            {
+                Id = 1,
+                Children = new List<GrandChildModel>
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 200,
+                        Name = "Name 2",
+                        Value = 200
+                    }
+                },
+            };
+
+            var newModel = new IEnumerableModel()
+            {
+                Id = 1,
+                Children = new List<GrandChildModel>
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 300,
+                        Name = "Name 3",
+                        Value = 300
+                    }
+                },
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(6, diff.Count);
+        }
+
+        [TestMethod]
+        public void Configure_IDictionary()
+        {
+            SutEngine.Configure<IDictionaryModel>();
+
+            var oldModel = new IDictionaryModel()
+            {
+                Id = 1,
+                Children = new Dictionary<int, GrandChildModel>
+                {
+                    {100,
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    }},
+                    {200,
+                    new GrandChildModel()
+                    {
+                        Id = 200,
+                        Name = "Name 2",
+                        Value = 200
+                    }}
+                },
+            };
+
+            var newModel = new IDictionaryModel()
+            {
+                Id = 1,
+                Children = new Dictionary<int, GrandChildModel>
+                {
+                    { 100,
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    } },
+                    {300,
+                    new GrandChildModel()
+                    {
+                        Id = 300,
+                        Name = "Name 3",
+                        Value = 300
+                    }}
                 },
             };
 
