@@ -386,5 +386,35 @@ namespace AutoCompare.Tests
             var changes = SutEngine.Compare<NestedModel>(null, null);
             Assert.IsFalse(changes.Any());
         }
+
+        [TestMethod]
+        public void Compare_List_With_Null()
+        {
+            SutEngine.Configure<IListModel>()
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id));
+
+            var oldModel = new IListModel()
+            {
+                Id = 1,
+                Children = null,
+            };
+
+            var newModel = new IListModel()
+            {
+                Id = 1,
+                Children = new List<GrandChildModel>()
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name",
+                        Value = 25,
+                    }
+                }
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(3, diff.Count());
+        }
     }
 }
