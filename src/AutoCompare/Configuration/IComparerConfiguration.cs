@@ -11,16 +11,22 @@ namespace AutoCompare.Configuration
     public interface IComparerConfiguration<T>
     {
         /// <summary>
-        /// Configures how the engine handles the specified property
+        /// By default, only public properties are compared. Call this to enable comparing public fields for the specified type.
+        /// </summary>
+        /// <returns></returns>
+        IComparerConfiguration<T> ComparePublicFields();
+
+        /// <summary>
+        /// Configures how the engine handles the specified member
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IPropertyConfiguration> configuration);
+        IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IMemberConfiguration> configuration);
 
         /// <summary>
-        /// Configures how the engine handles the specified IEnumerable property
+        /// Configures how the engine handles the specified IEnumerable member
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
@@ -29,7 +35,7 @@ namespace AutoCompare.Configuration
         IComparerConfiguration<T> For<TProp>(Expression<Func<T, IEnumerable<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
 
         /// <summary>
-        /// Configures how the engine handles the specified List property
+        /// Configures how the engine handles the specified List member
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
@@ -38,7 +44,7 @@ namespace AutoCompare.Configuration
         IComparerConfiguration<T> For<TProp>(Expression<Func<T, List<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
 
         /// <summary>
-        /// Configures how the engine handles the specified IList property
+        /// Configures how the engine handles the specified IList member
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
@@ -47,7 +53,7 @@ namespace AutoCompare.Configuration
         IComparerConfiguration<T> For<TProp>(Expression<Func<T, IList<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class;
 
         /// <summary>
-        /// Configures how the engine handles the specified array property
+        /// Configures how the engine handles the specified array member
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
         /// <param name="member"></param>
@@ -60,7 +66,7 @@ namespace AutoCompare.Configuration
         /// .For(x => x.Property, x => x.Ignore())
         /// </summary>
         /// <typeparam name="TProp"></typeparam>
-        /// <param name="member">The property to ignore</param>
+        /// <param name="member">The member to ignore</param>
         /// <returns>self</returns>
         IComparerConfiguration<T> Ignore<TProp>(Expression<Func<T, TProp>> member);
 

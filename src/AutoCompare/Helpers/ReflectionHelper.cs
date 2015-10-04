@@ -18,18 +18,13 @@ namespace AutoCompare.Helpers
             MemberExpression member = null;
             switch (expression.Body.NodeType)
             {
-                case ExpressionType.Convert:
-                    var method = (UnaryExpression)expression.Body;
-                    member = (MemberExpression)method.Operand;
-                    break;
                 case ExpressionType.MemberAccess:
                     member = (MemberExpression)expression.Body;
                     break;
             }
             if (member == null) throw new Exception("Expected a property getter");
 
-            var propertyInfo = member.Member as PropertyInfo;
-            return propertyInfo != null ? propertyInfo.GetMethod : member.Member;
+            return member.Member;
         }
     }
 }

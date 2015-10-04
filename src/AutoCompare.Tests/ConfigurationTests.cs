@@ -240,5 +240,62 @@ namespace AutoCompare.Tests
             var diff = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(6, diff.Count);
         }
+
+        [TestMethod]
+        public void Configure_A_Type_With_Only_Public_Fields()
+        {
+            SutEngine.Configure<PublicFieldsModel>()
+                .ComparePublicFields()
+                .Ignore(x => x.Ignored);
+
+            var oldModel = new PublicFieldsModel()
+            {
+                Id = 1,
+                Check = false,
+                Name = "Name",
+                Values = new List<int>() { 1, 2, 3, 4 },
+                Ignored = 5,
+            };
+
+            var newModel = new PublicFieldsModel()
+            {
+                Id = 1,
+                Check = true,
+                Name = "Name 2",
+                Values = new List<int>() { 2, 3, 4, 5 },
+                Ignored = 6,
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(4, diff.Count);
+        }
+
+        [TestMethod]
+        public void Configure_A_Type_Ignoring_Public_Fields()
+        {
+            SutEngine.Configure<PublicFieldsModel>()
+                .Ignore(x => x.Ignored);
+
+            var oldModel = new PublicFieldsModel()
+            {
+                Id = 1,
+                Check = false,
+                Name = "Name",
+                Values = new List<int>() { 1, 2, 3, 4 },
+                Ignored = 5,
+            };
+
+            var newModel = new PublicFieldsModel()
+            {
+                Id = 1,
+                Check = true,
+                Name = "Name 2",
+                Values = new List<int>() { 2, 3, 4, 5 },
+                Ignored = 6,
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(0, diff.Count);
+        }
     }
 }

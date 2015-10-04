@@ -416,5 +416,34 @@ namespace AutoCompare.Tests
             var diff = SutEngine.Compare(oldModel, newModel);
             Assert.AreEqual(3, diff.Count());
         }
+
+        [TestMethod]
+        public void Compare_Dictionary_With_Null()
+        {
+            SutEngine.Configure<IDictionaryModel>();
+
+            var oldModel = new IDictionaryModel()
+            {
+                Id = 1,
+                Children = null,
+            };
+
+            var newModel = new IDictionaryModel()
+            {
+                Id = 1,
+                Children = new Dictionary<int, GrandChildModel>()
+                {
+                    {100, new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name",
+                        Value = 25,
+                    }}
+                }
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(3, diff.Count());
+        }
     }
 }

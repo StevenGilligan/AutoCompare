@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace AutoCompare.Configuration
 {
-    internal class EnumerableConfiguration : PropertyConfiguration
+    internal class EnumerableConfiguration : MemberConfiguration
     {
         public Expression Matcher { get; protected set; }
         public Type MatcherType { get; protected set; }

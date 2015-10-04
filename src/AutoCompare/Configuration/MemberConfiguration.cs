@@ -1,10 +1,10 @@
 ﻿namespace AutoCompare.Configuration
 {
-    internal class PropertyConfiguration : IPropertyConfiguration
+    internal class MemberConfiguration : IMemberConfiguration
     {
         public bool Ignored { get; private set; } = false;
 
-        public IPropertyConfiguration Ignore()
+        public IMemberConfiguration Ignore()
         {
             Ignored = true;
             return this;

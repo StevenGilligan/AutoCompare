@@ -110,7 +110,7 @@ namespace AutoCompare.Compilation
         /// </summary>
         /// <param name="propType"></param>
         /// <returns></returns>
-        public static bool IsIDictionary(Type propType)
+        public static bool IsIDictionaryType(Type propType)
         {
             return (propType.IsGenericType && propType.GetGenericTypeDefinition() == _genericIDictionaryType)
                 || propType.GetInterfaces().Any(x =>
@@ -135,45 +135,56 @@ namespace AutoCompare.Compilation
                 return null;
             }
 
-            PropertyInfo[] properties = type.GetProperties();
-
+            var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance)
+                              .Where(x => FilterMember(configuration, x));
+            
             // Keep track of types in the hierarchy to avoid circular references
             hierarchy.Add(type);
             var prefix = ctx.Name;
 
             var expressions = new List<Expression>();
 
-            foreach (var prop in properties)
+            foreach (var member in members)
             {
-                var propMethodInfo = prop.GetGetMethod();
-                var propType = prop.PropertyType;
-                var propertyConfiguration = configuration.GetPropertyConfiguration(propMethodInfo.Name);
-                var enumerableConfiguration = propertyConfiguration as EnumerableConfiguration;
-                if (propertyConfiguration.Ignored)
+                string memberName = member.Name;
+                Type memberType = null;
+
+                var property = member as PropertyInfo;
+                if (property != null)
                 {
-                    continue;
+                    memberType = property.PropertyType;
                 }
-                ctx.PropA = Expression.Property(ctx.A, prop);
-                ctx.PropB = Expression.Property(ctx.B, prop);
-                ctx.Name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}.{prop.Name}";
-                if (IsSimpleType(propType))
+
+                var field = member as FieldInfo;
+                if (field != null)
+                {
+                    memberType = field.FieldType;
+                }
+
+                var propertyConfiguration = configuration.GetMemberConfiguration(memberName);
+                var enumerableConfiguration = propertyConfiguration as EnumerableConfiguration;
+
+                ctx.PropA = Expression.PropertyOrField(ctx.A, memberName);
+                ctx.PropB = Expression.PropertyOrField(ctx.B, memberName);
+                ctx.Name = string.IsNullOrEmpty(prefix) ? memberName : $"{prefix}.{memberName}";
+                if (IsSimpleType(memberType))
                 {
                     // ValueType, simply compare value with an if (a.X != b.X) 
-                    expressions.Add(GetPropertyCompareExpression(ctx, prop));
+                    expressions.Add(GetPropertyCompareExpression(ctx, memberName));
                 }
-                else if (IsIDictionary(propType))
+                else if (IsIDictionaryType(memberType))
                 {
                     // Static call to CollectionComparer.CompareIDictionary<K,V> to compare IDictionary properties
-                    expressions.Add(GetIDictionaryPropertyExpression(ctx, configuration.Engine, propType));
+                    expressions.Add(GetIDictionaryPropertyExpression(ctx, configuration.Engine, memberType));
                 }
-                else if (IsIEnumerableType(propType))
+                else if (IsIEnumerableType(memberType))
                 {
-                    expressions.Add(GetIEnumerablePropertyExpression(ctx, configuration.Engine, enumerableConfiguration, propType));
+                    expressions.Add(GetIEnumerablePropertyExpression(ctx, configuration.Engine, enumerableConfiguration, memberType));
                 }
                 else
                 {
                     // Recursively compare nested types
-                    expressions.Add(GetSafeguardedRecursiveExpression(propType, ctx, propMethodInfo, configuration, hierarchy));
+                    expressions.Add(GetSafeguardedRecursiveExpression(memberType, ctx, memberType, configuration, hierarchy));
                 }
             }
 
@@ -194,13 +205,34 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
+        /// Filters members based on the configuration
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        private static bool FilterMember(ComparerConfiguration configuration, MemberInfo member)
+        {
+            var isField = member is FieldInfo;
+            var isProperty = member is PropertyInfo;
+
+            if (!isField && !isProperty)
+                return false;
+
+            if (isField && !configuration.CompareFields)
+                return false;
+
+            var memberConfiguration = configuration.GetMemberConfiguration(member.Name);
+            return !memberConfiguration.Ignored;
+        }
+
+        /// <summary>
         /// Generates the Expression Tree required to test, compare a property 
         /// and return a Difference if needed
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="property"></param>
+        /// <param name="memberName"></param>
         /// <returns></returns>
-        private static Expression GetPropertyCompareExpression(Context ctx, PropertyInfo property)
+        private static Expression GetPropertyCompareExpression(Context ctx, string memberName)
         {
             /* The following expression tree compiles to essentially this : 
              * 
@@ -223,8 +255,8 @@ namespace AutoCompare.Compilation
                                     Expression.Equal(ctx.B, nullConst)),
                                 Expression.NotEqual(ctx.A, ctx.B)),
                             Expression.NotEqual(
-                                Expression.Property(ctx.A, property),
-                                Expression.Property(ctx.B, property))),
+                                Expression.PropertyOrField(ctx.A, memberName),
+                                Expression.PropertyOrField(ctx.B, memberName))),
                         Expression.Call(ctx.List, _listAdd,
                             Expression.MemberInit(
                                 Expression.New(_updateType),
@@ -247,15 +279,15 @@ namespace AutoCompare.Compilation
         /// </summary>
         /// <param name="type"></param>
         /// <param name="ctx"></param>
-        /// <param name="propMethodInfo"></param>
+        /// <param name="memberType"></param>
         /// <param name="configuration"></param>
         /// <param name="hierarchy"></param>
         /// <returns></returns>
-        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, MethodInfo propMethodInfo, ComparerConfiguration configuration, HashSet<Type> hierarchy)
+        private static Expression GetSafeguardedRecursiveExpression(Type type, Context ctx, Type memberType, ComparerConfiguration configuration, HashSet<Type> hierarchy)
         {
-            var tempA = Expression.Parameter(propMethodInfo.ReturnType, "tempA");
-            var tempB = Expression.Parameter(propMethodInfo.ReturnType, "tempB");
-            var nullChecked = new NullChecked(ctx, propMethodInfo.ReturnType);
+            var tempA = Expression.Parameter(memberType, "tempA");
+            var tempB = Expression.Parameter(memberType, "tempB");
+            var nullChecked = new NullChecked(ctx, memberType);
 
             var blockExpressions = new List<Expression>()
             {

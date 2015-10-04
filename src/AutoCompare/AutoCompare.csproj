@@ -53,8 +53,8 @@
     <Compile Include="Configuration\EnumerableConfiguration.cs" />
     <Compile Include="Configuration\IPrecompile.cs" />
     <Compile Include="Configuration\ComparerConfiguration.cs" />
-    <Compile Include="Configuration\IPropertyConfiguration.cs" />
-    <Compile Include="Configuration\PropertyConfiguration.cs" />
+    <Compile Include="Configuration\IMemberConfiguration.cs" />
+    <Compile Include="Configuration\MemberConfiguration.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Helpers\ReflectionHelper.cs" />

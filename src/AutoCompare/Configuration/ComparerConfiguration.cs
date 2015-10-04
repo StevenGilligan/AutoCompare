@@ -4,23 +4,24 @@ using System.Linq.Expressions;
 using AutoCompare.Helpers;
 using AutoCompare.Compilation;
 using System.Threading.Tasks;
-using System.Reflection;
 
 namespace AutoCompare.Configuration
 {
     internal class ComparerConfiguration
     {
-        protected Dictionary<string, PropertyConfiguration> _propertyConfigs = new Dictionary<string, PropertyConfiguration>();
+        protected Dictionary<string, MemberConfiguration> _propertyConfigs = new Dictionary<string, MemberConfiguration>();
+
         public IComparerEngine Engine { get; private set; }
+        public bool CompareFields { get; protected set; } = false;
 
         public ComparerConfiguration(IComparerEngine engine)
         {
             Engine = engine;
         }
 
-        public PropertyConfiguration GetPropertyConfiguration(string property)
+        public MemberConfiguration GetMemberConfiguration(string property)
         {
-            return _propertyConfigs.ContainsKey(property) ? _propertyConfigs[property] : new PropertyConfiguration();
+            return _propertyConfigs.ContainsKey(property) ? _propertyConfigs[property] : new MemberConfiguration();
         }
     }
 
@@ -31,14 +32,20 @@ namespace AutoCompare.Configuration
         {
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IPropertyConfiguration> configuration)
+        public IComparerConfiguration<T> ComparePublicFields()
+        {
+            CompareFields = true;
+            return this;
+        }
+
+        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IMemberConfiguration> configuration)
         {
             var memberInfo = ReflectionHelper.GetPropertyGetterMemberInfo(member);
             if (_propertyConfigs.ContainsKey(memberInfo.Name))
             {
                 throw new Exception($"The property {memberInfo.Name} is already configured.");
             }
-            var property = new PropertyConfiguration();
+            var property = new MemberConfiguration();
             configuration(property);
             _propertyConfigs.Add(memberInfo.Name, property);
             return this;

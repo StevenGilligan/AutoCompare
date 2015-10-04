@@ -7,7 +7,7 @@ namespace AutoCompare.Configuration
     /// Configures how the engine handles the specified IEnumerable property
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IEnumerableConfiguration<T> : IPropertyConfiguration where T : class
+    public interface IEnumerableConfiguration<T> : IMemberConfiguration where T : class
     {
         /// <summary>
         /// Specifies that the IEnumerable property should be compared by matching child objects with the same ID

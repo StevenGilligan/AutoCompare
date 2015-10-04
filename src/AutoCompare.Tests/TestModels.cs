@@ -170,4 +170,13 @@ namespace AutoCompare.Tests
         public int Id { get; set; }
         public IDictionary<int, GrandChildModel> Children { get; set; }
     }
+
+    public class PublicFieldsModel
+    {
+        public int Id;
+        public bool Check;
+        public string Name;
+        public List<int> Values;
+        public int Ignored;
+    }
 }
