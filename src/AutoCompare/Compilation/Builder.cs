@@ -42,8 +42,8 @@ namespace AutoCompare.Compilation
             
             var ctx = new Context()
             {
-                A = Expression.Parameter(type, "a"),
-                B = Expression.Parameter(type, "b"),
+                ObjectA = Expression.Parameter(type, "a"),
+                ObjectB = Expression.Parameter(type, "b"),
                 List = Expression.Variable(_updateListType, "list"),
             };
             var retLabel = Expression.Label(_updateListType);
@@ -64,7 +64,7 @@ namespace AutoCompare.Compilation
 
             // Compile the expression blocks to a lambda expression
             var body = Expression.Block(_updateListType, new[] { ctx.List }, blocks);
-            var comparator = Expression.Lambda<Func<T, T, List<Difference>>>(body, (ParameterExpression)ctx.A, (ParameterExpression)ctx.B);
+            var comparator = Expression.Lambda<Func<T, T, List<Difference>>>(body, (ParameterExpression)ctx.ObjectA, (ParameterExpression)ctx.ObjectB);
             var newComparer = new CompiledComparer<T>(comparator.Compile());
 #if DEBUG
             try
@@ -81,39 +81,39 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
-        /// Determines if the property type should be compared with a simple equality check
+        /// Determines if the type should be compared with a simple equality check
         /// </summary>
-        /// <param name="propType">The property type to test</param>
-        /// <returns>If we consider this property a value type</returns>
-        public static bool IsSimpleType(Type propType)
+        /// <param name="type">The type to test</param>
+        /// <returns>If we consider this type a value type</returns>
+        public static bool IsSimpleType(Type type)
         {
-            return propType.IsPrimitive || propType.IsEnum ||
-                    propType.FullName.StartsWith("System") &&
-                   (!propType.IsGenericType || propType.Name.StartsWith("Nullable"));
+            return type.IsPrimitive || type.IsEnum ||
+                    type.FullName.StartsWith("System") &&
+                   (!type.IsGenericType || type.Name.StartsWith("Nullable"));
         }
 
         /// <summary>
-        /// Determines if the property type is IEnumerable or implements IEnumerable
+        /// Determines if the type is IEnumerable or implements IEnumerable
         /// </summary>
-        /// <param name="propType"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsIEnumerableType(Type propType)
+        public static bool IsIEnumerableType(Type type)
         {
-            return (propType.IsGenericType && propType.GetGenericTypeDefinition() == _genericIEnumerableType)
-                || propType.GetInterfaces().Any(x =>
+            return (type.IsGenericType && type.GetGenericTypeDefinition() == _genericIEnumerableType)
+                || type.GetInterfaces().Any(x =>
                     x.IsGenericType &&
                     x.GetGenericTypeDefinition() == _genericIEnumerableType);
         }
 
         /// <summary>
-        /// Determines if the property type is IDicionary or implements IDictionary
+        /// Determines if the type is IDicionary or implements IDictionary
         /// </summary>
-        /// <param name="propType"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsIDictionaryType(Type propType)
+        public static bool IsIDictionaryType(Type type)
         {
-            return (propType.IsGenericType && propType.GetGenericTypeDefinition() == _genericIDictionaryType)
-                || propType.GetInterfaces().Any(x =>
+            return (type.IsGenericType && type.GetGenericTypeDefinition() == _genericIDictionaryType)
+                || type.GetInterfaces().Any(x =>
                     x.IsGenericType &&
                     x.GetGenericTypeDefinition() == _genericIDictionaryType);
         }
@@ -161,25 +161,25 @@ namespace AutoCompare.Compilation
                     memberType = field.FieldType;
                 }
 
-                var propertyConfiguration = configuration.GetMemberConfiguration(memberName);
-                var enumerableConfiguration = propertyConfiguration as EnumerableConfiguration;
+                var memberConfiguration = configuration.GetMemberConfiguration(memberName);
+                var enumerableConfiguration = memberConfiguration as EnumerableConfiguration;
 
-                ctx.PropA = Expression.PropertyOrField(ctx.A, memberName);
-                ctx.PropB = Expression.PropertyOrField(ctx.B, memberName);
+                ctx.MemberA = Expression.PropertyOrField(ctx.ObjectA, memberName);
+                ctx.MemberB = Expression.PropertyOrField(ctx.ObjectB, memberName);
                 ctx.Name = string.IsNullOrEmpty(prefix) ? memberName : $"{prefix}.{memberName}";
                 if (IsSimpleType(memberType))
                 {
                     // ValueType, simply compare value with an if (a.X != b.X) 
-                    expressions.Add(GetPropertyCompareExpression(ctx, memberName));
+                    expressions.Add(GetMemberCompareExpression(ctx, memberName));
                 }
                 else if (IsIDictionaryType(memberType))
                 {
                     // Static call to CollectionComparer.CompareIDictionary<K,V> to compare IDictionary properties
-                    expressions.Add(GetIDictionaryPropertyExpression(ctx, configuration.Engine, memberType));
+                    expressions.Add(GetIDictionaryMemberExpression(ctx, configuration.Engine, memberType));
                 }
                 else if (IsIEnumerableType(memberType))
                 {
-                    expressions.Add(GetIEnumerablePropertyExpression(ctx, configuration.Engine, enumerableConfiguration, memberType));
+                    expressions.Add(GetIEnumerableMemberExpression(ctx, configuration.Engine, enumerableConfiguration, memberType));
                 }
                 else
                 {
@@ -199,8 +199,8 @@ namespace AutoCompare.Compilation
             return Expression.IfThen(
                 Expression.Not(
                     Expression.AndAlso(
-                        Expression.Equal(ctx.A, Expression.Constant(null)),
-                        Expression.Equal(ctx.B, Expression.Constant(null)))),
+                        Expression.Equal(ctx.ObjectA, Expression.Constant(null)),
+                        Expression.Equal(ctx.ObjectB, Expression.Constant(null)))),
                 Expression.Block(expressions));
         }
 
@@ -226,13 +226,13 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
-        /// Generates the Expression Tree required to test, compare a property 
+        /// Generates the Expression Tree required to test, compare a member
         /// and return a Difference if needed
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="memberName"></param>
         /// <returns></returns>
-        private static Expression GetPropertyCompareExpression(Context ctx, string memberName)
+        private static Expression GetMemberCompareExpression(Context ctx, string memberName)
         {
             /* The following expression tree compiles to essentially this : 
              * 
@@ -251,26 +251,26 @@ namespace AutoCompare.Compilation
                         Expression.OrElse(
                             Expression.AndAlso(
                                 Expression.OrElse(
-                                    Expression.Equal(ctx.A, nullConst),
-                                    Expression.Equal(ctx.B, nullConst)),
-                                Expression.NotEqual(ctx.A, ctx.B)),
+                                    Expression.Equal(ctx.ObjectA, nullConst),
+                                    Expression.Equal(ctx.ObjectB, nullConst)),
+                                Expression.NotEqual(ctx.ObjectA, ctx.ObjectB)),
                             Expression.NotEqual(
-                                Expression.PropertyOrField(ctx.A, memberName),
-                                Expression.PropertyOrField(ctx.B, memberName))),
+                                Expression.PropertyOrField(ctx.ObjectA, memberName),
+                                Expression.PropertyOrField(ctx.ObjectB, memberName))),
                         Expression.Call(ctx.List, _listAdd,
                             Expression.MemberInit(
                                 Expression.New(_updateType),
                                 Expression.Bind(_setName, Expression.Constant(ctx.Name)),
                                 Expression.Bind(_setOldValue,
                                      Expression.Condition(
-                                        Expression.Equal(ctx.A, nullConst),
+                                        Expression.Equal(ctx.ObjectA, nullConst),
                                         nullConst,
-                                        Expression.Convert(ctx.PropA, typeof(object)))),
+                                        Expression.Convert(ctx.MemberA, typeof(object)))),
                                 Expression.Bind(_setNewValue,
                                      Expression.Condition(
-                                        Expression.Equal(ctx.B, nullConst),
+                                        Expression.Equal(ctx.ObjectB, nullConst),
                                         nullConst,
-                                        Expression.Convert(ctx.PropB, typeof(object)))))));
+                                        Expression.Convert(ctx.MemberB, typeof(object)))))));
         }
 
         /// <summary>
@@ -297,8 +297,8 @@ namespace AutoCompare.Compilation
 
             var recursiveCtx = new Context()
             {
-                A = tempA,
-                B = tempB,
+                ObjectA = tempA,
+                ObjectB = tempB,
                 Name = ctx.Name,
                 List = ctx.List,
             };
@@ -316,17 +316,17 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
-        /// Returns the expression that compares two IDictionary properties
+        /// Returns the expression that compares two IDictionary members
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="engine"></param>
-        /// <param name="propType"></param>
+        /// <param name="memberType"></param>
         /// <returns></returns>
-        private static MethodCallExpression GetIDictionaryPropertyExpression(Context ctx, IComparerEngine engine, Type propType)
+        private static MethodCallExpression GetIDictionaryMemberExpression(Context ctx, IComparerEngine engine, Type memberType)
         {
-            var nullChecked = new NullChecked(ctx, propType);
+            var nullChecked = new NullChecked(ctx, memberType);
 
-            var genericPropTypes = propType.GetGenericArguments();
+            var genericPropTypes = memberType.GetGenericArguments();
 
             var methodInfo = CollectionComparer.GetCompareIDictionaryMethodInfo(genericPropTypes);
 
@@ -351,20 +351,20 @@ namespace AutoCompare.Compilation
         }
 
         /// <summary>
-        /// Returns the expression that compares two IEnumerable properties
+        /// Returns the expression that compares two IEnumerable members
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="engine"></param>
         /// <param name="configuration"></param>
-        /// <param name="propType"></param>
+        /// <param name="memberType"></param>
         /// <returns></returns>
-        private static Expression GetIEnumerablePropertyExpression(Context ctx, IComparerEngine engine, EnumerableConfiguration configuration, Type propType)
+        private static Expression GetIEnumerableMemberExpression(Context ctx, IComparerEngine engine, EnumerableConfiguration configuration, Type memberType)
         {
-            var nullChecked = new NullChecked(ctx, propType);
+            var nullChecked = new NullChecked(ctx, memberType);
 
             if (configuration != null && !string.IsNullOrEmpty(configuration.Match))
             {
-                var itemType = propType.IsArray ? propType.GetElementType() : propType.GetGenericArguments().First();
+                var itemType = memberType.IsArray ? memberType.GetElementType() : memberType.GetGenericArguments().First();
                 var types = new[] { itemType, configuration.MatcherType };
                 
                 // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
@@ -383,7 +383,7 @@ namespace AutoCompare.Compilation
             // Static call to CollectionComparer.CompareIEnumerable<T> to compare IEnumerable properties
             return Expression.Call(ctx.List,
                 _listAddRange,
-                Expression.Call(CollectionComparer.GetCompareIEnumerableMethodInfo(propType.GetGenericArguments()),
+                Expression.Call(CollectionComparer.GetCompareIEnumerableMethodInfo(memberType.GetGenericArguments()),
                     Expression.Constant(ctx.Name), nullChecked.PropA, nullChecked.PropB));
         }
     }

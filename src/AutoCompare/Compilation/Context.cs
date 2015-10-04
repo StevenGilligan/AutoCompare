@@ -8,19 +8,19 @@ namespace AutoCompare.Compilation
     internal struct Context
     {
         /// <summary>
-        /// Name of the current property
+        /// Name of the current member
         /// </summary>
         public string Name;
 
         /// <summary>
         /// Old object
         /// </summary>
-        public Expression A;
+        public Expression ObjectA;
 
         /// <summary>
         /// New object
         /// </summary>
-        public Expression B;
+        public Expression ObjectB;
 
         /// <summary>
         /// List of Difference
@@ -28,13 +28,13 @@ namespace AutoCompare.Compilation
         public ParameterExpression List;
 
         /// <summary>
-        /// Property accessor on old object
+        /// Member accessor on old object
         /// </summary>
-        public MemberExpression PropA;
+        public MemberExpression MemberA;
 
         /// <summary>
-        /// Property accessor on new object
+        /// Member accessor on new object
         /// </summary>
-        public MemberExpression PropB;
+        public MemberExpression MemberB;
     }
 }

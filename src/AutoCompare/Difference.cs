@@ -3,22 +3,22 @@
 namespace AutoCompare
 {
     /// <summary>
-    /// The results of a comparing a property on two objects of the same type
+    /// The results of a comparing a member on two objects of the same type
     /// </summary>
     public class Difference : IEquatable<Difference>
     {
         /// <summary>
-        /// Name of the property
+        /// Name of the member
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Value of the property in the old object
+        /// Value of the member in the old object
         /// </summary>
         public object OldValue { get; set; }
 
         /// <summary>
-        /// Value of the property in the new object
+        /// Value of the member in the new object
         /// </summary>
         public object NewValue { get; set; }
 

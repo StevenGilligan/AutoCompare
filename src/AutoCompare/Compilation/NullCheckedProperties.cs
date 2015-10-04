@@ -22,8 +22,8 @@ namespace AutoCompare.Compilation
             var nullConst = Expression.Constant(null);
             var typedNullConst = Expression.Convert(nullConst, propType);
 
-            PropA = Expression.Condition(Expression.Equal(ctx.A, nullConst), typedNullConst, ctx.PropA);
-            PropB = Expression.Condition(Expression.Equal(ctx.B, nullConst), typedNullConst, ctx.PropB);
+            PropA = Expression.Condition(Expression.Equal(ctx.ObjectA, nullConst), typedNullConst, ctx.MemberA);
+            PropB = Expression.Condition(Expression.Equal(ctx.ObjectB, nullConst), typedNullConst, ctx.MemberB);
         }
     }
 }

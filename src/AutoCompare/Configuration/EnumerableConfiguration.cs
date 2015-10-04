@@ -14,17 +14,17 @@ namespace AutoCompare.Configuration
 
     internal class EnumerableConfiguration<T> : EnumerableConfiguration, IEnumerableConfiguration<T> where T : class
     {
-        public IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member)
+        public IEnumerableConfiguration<T> MatchUsing<TMember>(Expression<Func<T, TMember>> member)
         {
-            return MatchUsing(member, default(TProp));
+            return MatchUsing(member, default(TMember));
         }
 
-        public IEnumerableConfiguration<T> MatchUsing<TProp>(Expression<Func<T, TProp>> member, TProp defaultId)
+        public IEnumerableConfiguration<T> MatchUsing<TMember>(Expression<Func<T, TMember>> member, TMember defaultId)
         {
             DefaultId = defaultId;
-            Match = ReflectionHelper.GetPropertyGetterMemberInfo(member).Name;
+            Match = ReflectionHelper.GetMemberInfo(member).Name;
             Matcher = member;
-            MatcherType = typeof(TProp);
+            MatcherType = typeof(TMember);
             return this;
         }
     }

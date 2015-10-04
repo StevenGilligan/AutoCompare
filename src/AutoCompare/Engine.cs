@@ -36,12 +36,12 @@ namespace AutoCompare
 
         /// <summary>
         /// Compares two objects of type T and returns a list
-        /// of Update for every property that was updated
+        /// of Difference for every member that has a different value
         /// </summary>
         /// <typeparam name="T">Type of object to compare</typeparam>
         /// <param name="oldObject">The object containing old values</param>
         /// <param name="newObject">The object containing updated values</param>
-        /// <returns>A list of values that have been updated between
+        /// <returns>A list of members and values that are different between
         /// the old object and the new object</returns>
         public IList<Difference> Compare<T>(T oldObject, T newObject) where T : class
         {

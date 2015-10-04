@@ -73,7 +73,7 @@ namespace AutoCompare
         /// Compares two IEnumerable and returns the list of added/removed items
         /// </summary>
         /// <typeparam name="T">Type of IEnumerables</typeparam>
-        /// <param name="name">Name of the property</param>
+        /// <param name="name">Name of the member</param>
         /// <param name="oldModel">The list of values from the old model</param>
         /// <param name="newModel">The list of updated values from the new model</param>
         /// <returns>A list of values that have been added or removed from the list</returns>
@@ -105,7 +105,7 @@ namespace AutoCompare
         /// </summary>
         /// <typeparam name="TKey">Type of the IDictionary key</typeparam>
         /// <typeparam name="TValue">Type of the IDictionary value</typeparam>
-        /// <param name="name">Name of the property</param>
+        /// <param name="name">Name of the member</param>
         /// <param name="oldModel">The dictionary of values from the old model</param>
         /// <param name="newModel">The dictionary of updated values from the new model</param>
         /// <returns>A list of values that have been updated, added or removed from the dictionary</returns>
@@ -146,7 +146,7 @@ namespace AutoCompare
         /// <typeparam name="TKey">Type of the IDictionary key</typeparam>
         /// <typeparam name="TValue">Type of the IDictionary value</typeparam>
         /// <param name="engine"></param>
-        /// <param name="name">Name of the property</param>
+        /// <param name="name">Name of the member</param>
         /// <param name="oldModel">The dictionary of values from the old model</param>
         /// <param name="newModel">The dictionary of updated values from the new model</param>
         /// <returns>A list of values that have been updated, added or removed from the dictionary</returns>

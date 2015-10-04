@@ -39,6 +39,22 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void Configure_Not_A_Member_Should_Throw()
+        {
+            SutEngine.Configure<SimpleModel>()
+                .For(x => "a string", x => x.Ignore());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void Configure_A_Member_That_Is_Not_A_Field_Or_Property_Should_Throw()
+        {
+            SutEngine.Configure<SimpleModel>()
+                .For(x => x.GetHashCode(), x => x.Ignore());
+        }
+
+        [TestMethod]
         public void Configure_Array()
         {
             SutEngine.Configure<ArrayModel>()
@@ -273,8 +289,7 @@ namespace AutoCompare.Tests
         [TestMethod]
         public void Configure_A_Type_Ignoring_Public_Fields()
         {
-            SutEngine.Configure<PublicFieldsModel>()
-                .Ignore(x => x.Ignored);
+            SutEngine.Configure<PublicFieldsModel>();
 
             var oldModel = new PublicFieldsModel()
             {

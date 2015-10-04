@@ -7,13 +7,13 @@ namespace AutoCompare.Helpers
     internal class ReflectionHelper
     {
         /// <summary>
-        /// Gets the MemberInfo that corresponds to the Getter method on a property from an expression
+        /// Gets the MemberInfo for this Property or Field
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static MemberInfo GetPropertyGetterMemberInfo<T1, T2>(Expression<Func<T1, T2>> expression)
+        public static MemberInfo GetMemberInfo<T1, T2>(Expression<Func<T1, T2>> expression)
         {
             MemberExpression member = null;
             switch (expression.Body.NodeType)
@@ -22,9 +22,12 @@ namespace AutoCompare.Helpers
                     member = (MemberExpression)expression.Body;
                     break;
             }
-            if (member == null) throw new Exception("Expected a property getter");
+            if (member == null) throw new Exception("Expected a member");
 
-            return member.Member;
+            var memberInfo = member.Member;
+            if (memberInfo.MemberType != MemberTypes.Field && memberInfo.MemberType != MemberTypes.Property) throw new Exception("Expected a field or property getter");
+
+            return memberInfo;
         }
     }
 }

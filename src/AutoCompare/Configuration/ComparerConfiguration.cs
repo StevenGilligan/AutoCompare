@@ -9,7 +9,7 @@ namespace AutoCompare.Configuration
 {
     internal class ComparerConfiguration
     {
-        protected Dictionary<string, MemberConfiguration> _propertyConfigs = new Dictionary<string, MemberConfiguration>();
+        protected Dictionary<string, MemberConfiguration> _memberConfigs = new Dictionary<string, MemberConfiguration>();
 
         public IComparerEngine Engine { get; private set; }
         public bool CompareFields { get; protected set; } = false;
@@ -19,9 +19,9 @@ namespace AutoCompare.Configuration
             Engine = engine;
         }
 
-        public MemberConfiguration GetMemberConfiguration(string property)
+        public MemberConfiguration GetMemberConfiguration(string memberName)
         {
-            return _propertyConfigs.ContainsKey(property) ? _propertyConfigs[property] : new MemberConfiguration();
+            return _memberConfigs.ContainsKey(memberName) ? _memberConfigs[memberName] : new MemberConfiguration();
         }
     }
 
@@ -38,52 +38,52 @@ namespace AutoCompare.Configuration
             return this;
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp>> member, Action<IMemberConfiguration> configuration)
+        public IComparerConfiguration<T> For<TMember>(Expression<Func<T, TMember>> member, Action<IMemberConfiguration> configuration)
         {
-            var memberInfo = ReflectionHelper.GetPropertyGetterMemberInfo(member);
-            if (_propertyConfigs.ContainsKey(memberInfo.Name))
+            var memberInfo = ReflectionHelper.GetMemberInfo(member);
+            if (_memberConfigs.ContainsKey(memberInfo.Name))
             {
-                throw new Exception($"The property {memberInfo.Name} is already configured.");
+                throw new Exception($"The member {memberInfo.Name} is already configured.");
             }
-            var property = new MemberConfiguration();
-            configuration(property);
-            _propertyConfigs.Add(memberInfo.Name, property);
+            var config = new MemberConfiguration();
+            configuration(config);
+            _memberConfigs.Add(memberInfo.Name, config);
             return this;
         }
 
-        private IComparerConfiguration<T> ForEnumerableInternal<TProp>(string memberName, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class
+        private IComparerConfiguration<T> ForEnumerableInternal<TMember>(string memberName, Action<IEnumerableConfiguration<TMember>> configuration) where TMember : class
         {
-            if (_propertyConfigs.ContainsKey(memberName))
+            if (_memberConfigs.ContainsKey(memberName))
             {
-                throw new Exception($"The property {memberName} is already configured.");
+                throw new Exception($"The member {memberName} is already configured.");
             }
-            var property = new EnumerableConfiguration<TProp>();
-            configuration(property);
-            _propertyConfigs.Add(memberName, property);
+            var config = new EnumerableConfiguration<TMember>();
+            configuration(config);
+            _memberConfigs.Add(memberName, config);
             return this;
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, IEnumerable<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class
+        public IComparerConfiguration<T> For<TMember>(Expression<Func<T, IEnumerable<TMember>>> member, Action<IEnumerableConfiguration<TMember>> configuration) where TMember : class
         {
-            return ForEnumerableInternal(ReflectionHelper.GetPropertyGetterMemberInfo(member).Name, configuration);
+            return ForEnumerableInternal(ReflectionHelper.GetMemberInfo(member).Name, configuration);
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, List<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class
+        public IComparerConfiguration<T> For<TMember>(Expression<Func<T, List<TMember>>> member, Action<IEnumerableConfiguration<TMember>> configuration) where TMember : class
         {
-            return ForEnumerableInternal(ReflectionHelper.GetPropertyGetterMemberInfo(member).Name, configuration);
+            return ForEnumerableInternal(ReflectionHelper.GetMemberInfo(member).Name, configuration);
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, IList<TProp>>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class
+        public IComparerConfiguration<T> For<TMember>(Expression<Func<T, IList<TMember>>> member, Action<IEnumerableConfiguration<TMember>> configuration) where TMember : class
         {
-            return ForEnumerableInternal(ReflectionHelper.GetPropertyGetterMemberInfo(member).Name, configuration);
+            return ForEnumerableInternal(ReflectionHelper.GetMemberInfo(member).Name, configuration);
         }
 
-        public IComparerConfiguration<T> For<TProp>(Expression<Func<T, TProp[]>> member, Action<IEnumerableConfiguration<TProp>> configuration) where TProp : class
+        public IComparerConfiguration<T> For<TMember>(Expression<Func<T, TMember[]>> member, Action<IEnumerableConfiguration<TMember>> configuration) where TMember : class
         {
-            return ForEnumerableInternal(ReflectionHelper.GetPropertyGetterMemberInfo(member).Name, configuration);
+            return ForEnumerableInternal(ReflectionHelper.GetMemberInfo(member).Name, configuration);
         }
 
-        public IComparerConfiguration<T> Ignore<TProp>(Expression<Func<T, TProp>> ignoreExpression)
+        public IComparerConfiguration<T> Ignore<TMember>(Expression<Func<T, TMember>> ignoreExpression)
         {
             For(ignoreExpression, x => x.Ignore());
             return this;
