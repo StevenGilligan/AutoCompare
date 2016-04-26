@@ -205,6 +205,56 @@ namespace AutoCompare.Tests
         }
 
         [TestMethod]
+        public void Configure_Inherited_IEnumerable()
+        {
+            SutEngine.Configure<InheritedIEnumerableModel>()
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id));
+
+            var oldModel = new InheritedIEnumerableModel()
+            {
+                Id = 1,
+                Children = new IEnumerableCollectionClass
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 200,
+                        Name = "Name 2",
+                        Value = 200
+                    }
+                },
+            };
+
+            var newModel = new InheritedIEnumerableModel()
+            {
+                Id = 1,
+                Children = new IEnumerableCollectionClass
+                {
+                    new GrandChildModel()
+                    {
+                        Id = 100,
+                        Name = "Name 1",
+                        Value = 100
+                    },
+                    new GrandChildModel()
+                    {
+                        Id = 300,
+                        Name = "Name 3",
+                        Value = 300
+                    }
+                },
+            };
+
+            var diff = SutEngine.Compare(oldModel, newModel);
+            Assert.AreEqual(6, diff.Count);
+        }
+
+        [TestMethod]
         public void Configure_IDictionary()
         {
             SutEngine.Configure<IDictionaryModel>();

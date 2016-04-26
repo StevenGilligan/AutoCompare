@@ -54,5 +54,20 @@ namespace AutoCompare.Tests
                 new HasIgnores() { Id = 2, IgnoreValue = 200 });
             Assert.AreEqual(0, diff.Count);
         }
+
+        [TestMethod]
+        public void Compile_A_Type_With_IEnumerable_Parent_Class()
+        {
+            SutEngine.Configure<InheritedIEnumerableModel>()
+                .Compile.Now();
+        }
+
+        [TestMethod]
+        public void Compile_A_Configured_Type_With_IEnumerable_Parent_Class()
+        {
+            SutEngine.Configure<InheritedIEnumerableModel>()
+                .For(x => x.Children, x => x.MatchUsing(y => y.Id))
+                .Compile.Now();
+        }
     }
 }

@@ -171,6 +171,17 @@ namespace AutoCompare.Tests
         public IDictionary<int, GrandChildModel> Children { get; set; }
     }
 
+    public class InheritedIEnumerableModel
+    {
+        public int Id { get; set; }
+        public IEnumerableCollectionClass Children {get;set;}
+    }
+
+    public class IEnumerableCollectionClass : List<GrandChildModel>
+    {
+
+    }
+
     public class PublicFieldsModel
     {
         public int Id;
