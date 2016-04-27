@@ -364,7 +364,7 @@ namespace AutoCompare.Compilation
 
             if (configuration != null && !string.IsNullOrEmpty(configuration.Match))
             {
-                var itemType = memberType.IsArray ? memberType.GetElementType() : memberType.GetGenericArguments().First();
+                var itemType = memberType.IsArray ? memberType.GetElementType() : GetGenericIEnumerableType(memberType).First();
                 var types = new[] { itemType, configuration.MatcherType };
                 
                 // Static call to CollectionComparer.CompareIEnumerableWithKeyAndDefault<T, TKey> to compare IEnumerable properties
@@ -383,8 +383,24 @@ namespace AutoCompare.Compilation
             // Static call to CollectionComparer.CompareIEnumerable<T> to compare IEnumerable properties
             return Expression.Call(ctx.List,
                 _listAddRange,
-                Expression.Call(CollectionComparer.GetCompareIEnumerableMethodInfo(memberType.GetGenericArguments()),
+                Expression.Call(CollectionComparer.GetCompareIEnumerableMethodInfo(GetGenericIEnumerableType(memberType)),
                     Expression.Constant(ctx.Name), nullChecked.PropA, nullChecked.PropB));
+        }
+
+        /// <summary>
+        /// Returns the generic type of an IEnumerable
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static Type[] GetGenericIEnumerableType(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == _genericIEnumerableType)
+                return type.GetGenericArguments();
+
+            return type.GetInterfaces()
+                .Where(t => t.IsGenericType == true
+                    && t.GetGenericTypeDefinition() == _genericIEnumerableType)
+                .Select(t => t.GetGenericArguments()).Single();
         }
     }
 }
