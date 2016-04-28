@@ -80,6 +80,11 @@ namespace AutoCompare.Compilation
             return newComparer;
         }
 
+        public static bool IsValueType(Type type)
+        {
+            return type.IsValueType;
+        }
+
         /// <summary>
         /// Determines if the type should be compared with a simple equality check
         /// </summary>
@@ -167,7 +172,12 @@ namespace AutoCompare.Compilation
                 ctx.MemberA = Expression.PropertyOrField(ctx.ObjectA, memberName);
                 ctx.MemberB = Expression.PropertyOrField(ctx.ObjectB, memberName);
                 ctx.Name = string.IsNullOrEmpty(prefix) ? memberName : $"{prefix}.{memberName}";
-                if (IsSimpleType(memberType))
+                if (IsValueType(type))
+                {
+                    // Compare the members of a struct
+                    expressions.Add(GetStructMemberCompareExpression(ctx, memberName));
+                }
+                else if (IsSimpleType(memberType))
                 {
                     // ValueType, simply compare value with an if (a.X != b.X) 
                     expressions.Add(GetMemberCompareExpression(ctx, memberName));
@@ -195,6 +205,13 @@ namespace AutoCompare.Compilation
             {
                 return null; // Object has no properties
             }
+
+            //Value types cannot be null, so just return the expressions
+            if (IsValueType(type))
+            {
+                return Expression.Block(expressions);
+            }
+
             // Check if both objects are null
             return Expression.IfThen(
                 Expression.Not(
@@ -271,6 +288,42 @@ namespace AutoCompare.Compilation
                                         Expression.Equal(ctx.ObjectB, nullConst),
                                         nullConst,
                                         Expression.Convert(ctx.MemberB, typeof(object)))))));
+        }
+
+        /// <summary>
+        /// Generates the Expression Tree required to compare the members
+        /// of a struct and return a Difference if needed
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="memberName"></param>
+        /// <returns></returns>
+        private static Expression GetStructMemberCompareExpression(Context ctx, string memberName)
+        {
+             /* The following expression tree compiles to essentially this : 
+             * 
+             * if (a.x != b.x)
+             * {
+             *   _list.Add(new Difference(){
+             *      Name = name,
+             *      OldValue = a.x,
+             *      NewValue = b.x
+             *   });
+             * }
+             * 
+             * */
+
+            return Expression.IfThen(
+                        Expression.NotEqual(
+                            Expression.PropertyOrField(ctx.ObjectA, memberName),
+                            Expression.PropertyOrField(ctx.ObjectB, memberName)),
+                        Expression.Call(ctx.List, _listAdd,
+                            Expression.MemberInit(
+                                Expression.New(_updateType),
+                                Expression.Bind(_setName, Expression.Constant(ctx.Name)),
+                                Expression.Bind(_setOldValue,
+                                        Expression.Convert(ctx.MemberA, typeof(object))),
+                                Expression.Bind(_setNewValue,
+                                        Expression.Convert(ctx.MemberB, typeof(object))))));
         }
 
         /// <summary>

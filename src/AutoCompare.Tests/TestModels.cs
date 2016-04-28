@@ -177,6 +177,18 @@ namespace AutoCompare.Tests
         public IEnumerableCollectionClass Children {get;set;}
     }
 
+    public class StructModel
+    {
+        public int Id { get; set; }
+        public StructMember StructMember { get; set; }
+    }
+    
+    public struct StructMember
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+    }
+
     public class IEnumerableCollectionClass : List<GrandChildModel>
     {
 

@@ -69,5 +69,12 @@ namespace AutoCompare.Tests
                 .For(x => x.Children, x => x.MatchUsing(y => y.Id))
                 .Compile.Now();
         }
+
+        [TestMethod]
+        public void Compile_A_Type_With_A_Struct_Member()
+        {
+            SutEngine.Configure<StructModel>()
+                .Compile.Now();
+        }
     }
 }

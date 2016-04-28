@@ -80,5 +80,33 @@ namespace AutoCompare.Tests
             Assert.AreEqual(changes.Count(), 1);
             Assert.IsNotNull(changes.Single(x => x.Name == "Id" && (long)x.OldValue == 1 && (long)x.NewValue == 2));
         }
+
+        [TestMethod]
+        public void Static_Comparer_A_Value_Type()
+        {
+            var oldModel = new StructModel
+            {
+                Id = 1,
+                StructMember = new StructMember
+                {
+                    Id = 1,
+                    Value = "Old"
+                }
+            };
+
+            var newModel = new StructModel
+            {
+                Id = 1,
+                StructMember = new StructMember
+                {
+                    Id = 1,
+                    Value = "New"
+                }
+            };
+
+            var changes = Comparer.Compare(oldModel, newModel);
+            Assert.AreEqual(changes.Count(), 1);
+            Assert.IsNotNull(changes.Single(x => x.Name == "StructMember.Value" && (string)x.OldValue == "Old" && (string)x.NewValue == "New"));
+        }
     }
 }
