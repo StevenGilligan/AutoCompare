@@ -20,7 +20,7 @@ Include [AutoCompare](https://www.nuget.org/packages/AutoCompare/) in your proje
 
 From the package manager console : 
 
-    PM> Install-Package AutoCompare -Pre
+    PM> Install-Package AutoCompare
 
 Features
 --------
