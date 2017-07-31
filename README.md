@@ -62,7 +62,7 @@ AutoCompare.Comparer.Configure<MyObjectType>()
 
 Calling `Configure<Type>()` is optional and AutoCompare will default to comparing every public property. 
 
-Please note that you must call `Configure<Type>()` only once per type, and call it before any call to `Compare<Type>()` is made or it will throw an exception.
+Please note `Configure<Type>()` can only be called once per type, and must be called before executing `Compare<Type>()`, or it will throw an exception.
 
 More examples can be found in AutoCompare.Tests
 
