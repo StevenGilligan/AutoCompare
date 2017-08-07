@@ -70,9 +70,29 @@ namespace AutoCompare.Configuration
         /// <returns>self</returns>
         IComparerConfiguration<T> Ignore<TMember>(Expression<Func<T, TMember>> member);
 
-        /// <summary>
-        /// Instructs the IComparerEngine how to precompile this comparer
-        /// </summary>
-        IPrecompile Compile { get; }
+
+	    /// <summary>
+	    /// Ignore a type from comparision
+	    /// </summary>
+	    /// <param name="typeToIgnore">Type to ignore</param>
+	    /// <returns>self</returns>
+	    IComparerConfiguration<T> IgnoreType(Type typeToIgnore);
+
+
+		/// <summary>
+		/// Ignore a type from comparision
+		/// </summary>
+		/// <typeparam name="TTtpe">Type to ignore</typeparam>
+		/// <returns>self</returns>
+		IComparerConfiguration<T> IgnoreType<TTtpe>();
+
+
+		/// <summary>
+		/// Instructs the IComparerEngine how to precompile this comparer
+		/// </summary>
+		IPrecompile Compile { get; }
+
+
+
     }
 }

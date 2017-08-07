@@ -22,6 +22,11 @@ namespace AutoCompare
         /// </summary>
         public object NewValue { get; set; }
 
+		/// <summary>
+		/// Type of member to be compared
+		/// </summary>
+		public Type Type { get; set; }
+
         /// <summary>
         /// 
         /// </summary>

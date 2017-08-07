@@ -15,7 +15,8 @@ namespace AutoCompare.Compilation
         private static readonly Type _genericIDictionaryType = typeof(IDictionary<,>);
 
         private static readonly MemberInfo _setName;
-        private static readonly MemberInfo _setOldValue;
+	    private static readonly MemberInfo _setType;
+		private static readonly MemberInfo _setOldValue;
         private static readonly MemberInfo _setNewValue;
         private static readonly MethodInfo _listAdd;
         private static readonly MethodInfo _listAddRange;
@@ -30,7 +31,8 @@ namespace AutoCompare.Compilation
         static Builder()
         {
             _setName = _updateType.GetMember("Name")[0];
-            _setOldValue = _updateType.GetMember("OldValue")[0];
+	        _setType = _updateType.GetMember("Type")[0];
+			_setOldValue = _updateType.GetMember("OldValue")[0];
             _setNewValue = _updateType.GetMember("NewValue")[0];
             _listAdd = _updateListType.GetMethod("Add");
             _listAddRange = _updateListType.GetMethod("AddRange");
@@ -231,14 +233,20 @@ namespace AutoCompare.Compilation
         {
             var isField = member is FieldInfo;
             var isProperty = member is PropertyInfo;
+	        
 
-            if (!isField && !isProperty)
+			if (!isField && !isProperty)
                 return false;
 
             if (isField && !configuration.CompareFields)
                 return false;
 
-            var memberConfiguration = configuration.GetMemberConfiguration(member.Name);
+	        var memberType = (member as PropertyInfo)?.PropertyType ?? (member as FieldInfo).FieldType;
+
+			if (configuration.IgnoredTypes.Contains(memberType))
+				return false;
+
+			var memberConfiguration = configuration.GetMemberConfiguration(member.Name);
             return !memberConfiguration.Ignored;
         }
 
@@ -278,16 +286,10 @@ namespace AutoCompare.Compilation
                             Expression.MemberInit(
                                 Expression.New(_updateType),
                                 Expression.Bind(_setName, Expression.Constant(ctx.Name)),
-                                Expression.Bind(_setOldValue,
-                                     Expression.Condition(
-                                        Expression.Equal(ctx.ObjectA, nullConst),
-                                        nullConst,
-                                        Expression.Convert(ctx.MemberA, typeof(object)))),
-                                Expression.Bind(_setNewValue,
-                                     Expression.Condition(
-                                        Expression.Equal(ctx.ObjectB, nullConst),
-                                        nullConst,
-                                        Expression.Convert(ctx.MemberB, typeof(object)))))));
+                                Expression.Bind(_setType, Expression.Constant(ctx.MemberA.Type)),
+								Expression.Bind(_setOldValue,Expression.Condition(Expression.Equal(ctx.ObjectA, nullConst),nullConst,Expression.Convert(ctx.MemberA, typeof(object)))),
+                                Expression.Bind(_setNewValue,Expression.Condition(Expression.Equal(ctx.ObjectB, nullConst),nullConst,Expression.Convert(ctx.MemberB, typeof(object)))))
+						));
         }
 
         /// <summary>
@@ -320,10 +322,9 @@ namespace AutoCompare.Compilation
                             Expression.MemberInit(
                                 Expression.New(_updateType),
                                 Expression.Bind(_setName, Expression.Constant(ctx.Name)),
-                                Expression.Bind(_setOldValue,
-                                        Expression.Convert(ctx.MemberA, typeof(object))),
-                                Expression.Bind(_setNewValue,
-                                        Expression.Convert(ctx.MemberB, typeof(object))))));
+                                Expression.Bind(_setType, Expression.Constant(ctx.MemberA.Type)),
+								Expression.Bind(_setOldValue,Expression.Convert(ctx.MemberA, typeof(object))),
+                                Expression.Bind(_setNewValue,Expression.Convert(ctx.MemberB, typeof(object))))));
         }
 
         /// <summary>
