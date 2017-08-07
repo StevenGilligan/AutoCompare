@@ -18,7 +18,20 @@ namespace AutoCompare.Tests
         public bool? Nullable { get; set; }
     }
 
-    public enum State
+	public class SimpleModelIgnore
+	{
+		public long Id { get; set; }
+		public bool Check { get; set; }
+		public string Name { get; set; }
+		public decimal Value { get; set; }
+		public DateTime Date { get; set; }
+		public TimeSpan Time { get; set; }
+		public State State { get; set; }
+		public bool? Nullable { get; set; }
+	}
+
+
+	public enum State
     {
         Unknown,
         Active,
