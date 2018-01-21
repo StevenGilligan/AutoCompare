@@ -57,9 +57,9 @@ namespace AutoCompare
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + Name.GetHashCode();
-                hash = hash * 23 + OldValue.GetHashCode();
-                hash = hash * 23 + NewValue.GetHashCode();
+                hash = hash * 23 + (Name == null ? DBNull.Value.GetHashCode() : Name.GetHashCode());
+                hash = hash * 23 + (OldValue == null ? DBNull.Value.GetHashCode() : OldValue.GetHashCode());
+                hash = hash * 23 + (NewValue == null ? DBNull.Value.GetHashCode() : NewValue.GetHashCode());
                 return hash;
             }
         }
