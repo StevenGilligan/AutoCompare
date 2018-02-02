@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCompare", "AutoCompare\AutoCompare.csproj", "{35AF29DC-5B41-4D92-9ED0-AA8F2CFBB863}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoCompare", "AutoCompare\AutoCompare.csproj", "{35AF29DC-5B41-4D92-9ED0-AA8F2CFBB863}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCompare.Tests", "AutoCompare.Tests\AutoCompare.Tests.csproj", "{C3CA7BC2-E701-462A-80E4-7A61459638D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoCompare.Tests", "AutoCompare.Tests\AutoCompare.Tests.csproj", "{C3CA7BC2-E701-462A-80E4-7A61459638D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A6520E69-6F30-42FF-ACB0-310CC158D6FC}
 	EndGlobalSection
 EndGlobal
